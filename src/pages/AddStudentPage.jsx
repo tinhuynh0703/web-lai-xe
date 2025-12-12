@@ -1,0 +1,1018 @@
+import { useForm, useWatch } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Camera,
+  FileImage,
+  FolderOpen,
+  FileText,
+  Eye,
+  Trash2,
+  Printer,
+  FileSpreadsheet,
+  ArrowLeft,
+  RotateCcw,
+  Save,
+} from "lucide-react";
+import { Button } from "../components/ui";
+import { Table } from "../components/ui";
+import { Modal } from "../components/ui";
+import { PageHeader } from "../components/layout";
+import {
+  Input,
+  SingleSelect,
+  Form,
+  Textarea,
+  Checkbox,
+  DatePicker,
+} from "../components/forms";
+import { studentEnrollmentSchema } from "../lib/validations/schemas";
+import { GENDERS } from "../constants";
+import {
+  useCoursesByDateRange,
+  useProfileTypes,
+  useAdministrativeUnits,
+  useNationalities,
+  useCreateStudentProfile,
+  useStudentsByCourse,
+  useTrainingClasses,
+} from "../hooks";
+import { showSuccess, showError } from "../utils";
+
+export default function AddStudentPage() {
+  const createStudentProfile = useCreateStudentProfile();
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+
+  const methods = useForm({
+    resolver: yupResolver(studentEnrollmentSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: {
+      // Chọn khóa học
+      courseId: "",
+      gplxClass: "",
+      minimumAge: "18",
+      openingDate: "",
+      closingDate: "",
+      trainingClass: "",
+      profileReceiveDate: "",
+      totalStudents: "",
+      currentStudents: "",
+
+      // Thông tin hồ sơ
+      registrationCode: "",
+      fullName: "",
+      printName: "",
+      dateOfBirth: "",
+      gender: "",
+      nationality: "VNM",
+      idCard: "",
+      idCardIssueDate: "",
+      idCardIssuePlace: "",
+      permanentAddress: "",
+      permanentAddressDetail: "",
+      currentAddress: "",
+      currentAddressDetail: "",
+      notes: "",
+      // Giấy phép lái xe hiện có
+      existingLicenseNumber: "",
+      existingLicenseStatus: "",
+      existingLicenseClass: "",
+      existingLicenseTestDate: "",
+      existingLicenseIssueDate: "",
+      existingLicenseExpiryDate: "",
+      existingLicenseIssuingUnit: "",
+      existingLicenseIssuingCountry: "",
+      // profileNumber: "",
+
+      // Giấy tờ kèm theo (dynamic từ API)
+      profileTypes: {},
+
+      // Ảnh chân dung
+      drivingYears: "",
+      drivingKilometers: "",
+    },
+  });
+
+  const getApplicantDefaultValues = () => ({
+    registrationCode: "",
+    fullName: "",
+    printName: "",
+    dateOfBirth: "",
+    gender: "",
+    nationality: "VNM",
+    idCard: "",
+    idCardIssueDate: "",
+    idCardIssuePlace: "",
+    permanentAddress: "",
+    permanentAddressDetail: "",
+    currentAddress: "",
+    currentAddressDetail: "",
+    notes: "",
+    existingLicenseNumber: "",
+    existingLicenseStatus: "",
+    existingLicenseClass: "",
+    existingLicenseTestDate: "",
+    existingLicenseIssueDate: "",
+    existingLicenseExpiryDate: "",
+    existingLicenseIssuingUnit: "",
+    existingLicenseIssuingCountry: "",
+    profileTypes: {},
+    drivingYears: "",
+    drivingKilometers: "",
+  });
+
+  const resetApplicantSection = () => {
+    const currentValues = methods.getValues();
+    methods.reset(
+      {
+        ...currentValues, // giữ nguyên Chọn khóa học
+        ...getApplicantDefaultValues(), // reset Thông tin Hồ sơ
+      },
+      {
+        keepErrors: false,
+        keepDirty: false,
+        keepTouched: false,
+      }
+    );
+  };
+
+  // Watch courseId để fetch danh sách học viên
+  const courseId = methods.watch("courseId");
+
+  // Fetch danh sách học viên từ API
+  const { data: studentsData = [], isLoading: isLoadingStudents } =
+    useStudentsByCourse(courseId);
+
+  // Format date từ YYYYMMDD sang DD/MM/YYYY
+  const formatDateFromYYYYMMDD = (dateString) => {
+    if (!dateString || dateString.length !== 8) return "-";
+    try {
+      const year = dateString.substring(0, 4);
+      const month = dateString.substring(4, 6);
+      const day = dateString.substring(6, 8);
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      return "-";
+    }
+  };
+
+  // Format date từ ISO string sang DD/MM/YYYY
+  const formatDateFromISO = (isoString) => {
+    if (!isoString) return "-";
+    try {
+      const date = new Date(isoString);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      return "-";
+    }
+  };
+
+  // Format giới tính từ F/M sang Nam/Nữ
+  const formatGender = (gender) => {
+    if (!gender) return "-";
+    if (gender === "F" || gender === "f") return "Nữ";
+    if (gender === "M" || gender === "m") return "Nam";
+    return gender;
+  };
+
+  // Map dữ liệu từ API sang format của bảng
+  const courseStudents = useMemo(() => {
+    if (!studentsData || studentsData.length === 0) return [];
+
+    return studentsData.map((student) => ({
+      // profileNumber: student.ma_dk || "-",
+      fullName: student.ho_va_ten || "-",
+      dateOfBirth: formatDateFromYYYYMMDD(student.ngay_sinh),
+      gender: formatGender(student.gioi_tinh),
+      nationality: "-", // Không có trong API response
+      idCard: student.so_cmt || "-",
+      permanentAddress: student.noi_thuong_tru || "-",
+      currentAddress: student.noi_cu_tru || "-",
+      imagePath: "-", // Không có trong API response
+      receiveDate: formatDateFromISO(student.ngay_nhan_hso),
+    }));
+  }, [studentsData]);
+
+  const filteredCourseStudents = useMemo(() => {
+    if (!studentSearch.trim()) return courseStudents;
+    const term = studentSearch.toLowerCase();
+    return courseStudents.filter((s) =>
+      [
+        s.profileNumber,
+        s.fullName,
+        s.idCard,
+        s.permanentAddress,
+        s.currentAddress,
+      ]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(term))
+    );
+  }, [courseStudents, studentSearch]);
+
+  // Convert date (with optional time) to ISO string format
+  const convertDateToISO = (dateString) => {
+    if (!dateString) return null;
+
+    // Nếu chỉ có yyyy-mm-dd thì set giờ mặc định 00:00:00 UTC để không lệch ngày
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
+    const isoString = isDateOnly
+      ? new Date(`${dateString}T00:00:00.000Z`)
+      : new Date(dateString);
+
+    if (isNaN(isoString.getTime())) return null;
+    return isoString.toISOString();
+  };
+
+  // Convert date from YYYY-MM-DD to YYYYMMDD (required for ngay_sinh)
+  const formatDateToYYYYMMDD = (dateString) => {
+    if (!dateString) return "";
+    const normalized = dateString.includes("T")
+      ? dateString.split("T")[0]
+      : dateString;
+    const cleaned = normalized.replaceAll("-", "");
+    if (cleaned.length === 8) return cleaned;
+    try {
+      const date = new Date(normalized);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}${month}${day}`;
+    } catch (error) {
+      return "";
+    }
+  };
+
+  // Find administrative unit by value (ma_dvhc or ma_dv)
+  const findAdministrativeUnit = (value) => {
+    if (!value) return null;
+    return administrativeUnits.find(
+      (unit) => unit.ma_dvhc === value || unit.ma_dv === value
+    );
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    // Kiểm tra trùng CMT/HC trong khóa học
+    const duplicateStudent = courseStudents.find(
+      (s) => s.idCard === data.idCard
+    );
+    if (duplicateStudent) {
+      setModalMessage(
+        "Số CMND/ HC bạn nhập đã có trong khóa học này. Xin vui lòng nhập lại số khác"
+      );
+      setIsModalOpen(true);
+      return;
+    }
+
+    // Tìm administrative units
+    const permanentAddressUnit = findAdministrativeUnit(data.permanentAddress);
+    const currentAddressUnit = findAdministrativeUnit(data.currentAddress);
+
+    // Map profileTypes thành giay_tos (chỉ lấy những cái đã được chọn)
+    const giayTos = [];
+    if (data.profileTypes) {
+      Object.entries(data.profileTypes).forEach(([maLoaiHs, isSelected]) => {
+        if (isSelected === true) {
+          const profileType = profileTypes.find(
+            (pt) => pt.ma_loai_hs.toString() === maLoaiHs
+          );
+          if (profileType) {
+            giayTos.push({
+              ma_gt: profileType.ma_loai_hs,
+              ten_gt: profileType.ten_loai_hs,
+            });
+          }
+        }
+      });
+    }
+
+    // Tạo đường dẫn ảnh: \\192.168.100.250\im_gplx\maKhoaHoc\maDk
+    const duongDanAnh = data.registrationCode
+      ? `\\\\192.168.100.250\\im_gplx\\${data.courseId}\\${data.registrationCode}`
+      : `\\\\192.168.100.250\\im_gplx\\${data.courseId}\\`;
+
+    // Map dữ liệu sang format API
+    const payload = {
+      ma_csdt: "48012",
+      ho_dem_nlx: "",
+      ten_nlx: data.fullName || "",
+      ma_quoc_tich: data.nationality || "",
+      ngay_sinh: formatDateToYYYYMMDD(data.dateOfBirth),
+      so_cmt: data.idCard || "",
+      ngay_cap_cmt: convertDateToISO(data.idCardIssueDate),
+      noi_cap_cmt: data.idCardIssuePlace || "",
+      ghi_chu: data.notes || "",
+      gioi_tinh: data.gender || "",
+      so_cmnd_cu: "",
+      // ma_loai_hs: data.profileNumber ? parseInt(data.profileNumber) || 0 : 0,
+      hang_gplx: data.gplxClass || "",
+      hang_dao_tao: data.trainingClass || "",
+      ma_khoa_hoc: data.courseId || "",
+      nam_hoc_lx: 0,
+      noi_tt_ma_dvhc:
+        permanentAddressUnit?.ma_dvhc || permanentAddressUnit?.ma_dv || "",
+      noi_tt_ma_dvql: permanentAddressUnit?.ma_dvql || "",
+      noi_ct_ma_dvhc:
+        currentAddressUnit?.ma_dvhc || currentAddressUnit?.ma_dv || "",
+      noi_ct_ma_dvql: currentAddressUnit?.ma_dvql || "",
+      duong_dan_anh: "",
+      so_nam_lx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
+      so_km_lxan_toan: data.drivingKilometers
+        ? parseInt(data.drivingKilometers) || 0
+        : 0,
+      giay_tos: giayTos,
+    };
+
+    console.log("Form data:", data);
+    console.log("Payload:", payload);
+    console.log("ghi_chu value:", payload.ghi_chu);
+
+    // Gọi API qua hook
+    createStudentProfile.mutate(payload, {
+      onSuccess: () => {
+        showSuccess("Thêm học viên thành công!");
+        resetApplicantSection();
+      },
+      onError: (error) => {
+        showError(
+          error.message || "Có lỗi xảy ra khi thêm học viên. Vui lòng thử lại."
+        );
+      },
+    });
+  };
+
+  // Watch fullName
+  const fullName = methods.watch("fullName");
+
+  // Get courses list (API call with empty body)
+  const { data: courses = [], isLoading: isLoadingCourses } =
+    useCoursesByDateRange();
+
+  // Get profile types from API
+  const { data: profileTypes = [], isLoading: isLoadingProfileTypes } =
+    useProfileTypes();
+
+  // Get administrative units from API
+  const {
+    data: administrativeUnits = [],
+    isLoading: isLoadingAdministrativeUnits,
+  } = useAdministrativeUnits();
+
+  // Get nationalities from API
+  const { data: nationalities = [], isLoading: isLoadingNationalities } =
+    useNationalities();
+
+  // Get GPLX classes from API (ma_hang, ma_hang_moi)
+  const { data: gplxClasses = [], isLoading: isLoadingGplxClasses } =
+    useTrainingClasses();
+
+  // Map administrative units to options for SingleSelect
+  const administrativeUnitOptions = useMemo(
+    () =>
+      administrativeUnits.map((unit) => ({
+        value: unit.ma_dvhc || unit.ma_dv,
+        label: unit.ten_day_du || unit.ten_dvhc || unit.ten_ngan_gon,
+      })),
+    [administrativeUnits]
+  );
+
+  // Map nationalities to options for SingleSelect
+  const nationalityOptions = useMemo(
+    () =>
+      nationalities.map((nationality) => ({
+        value: nationality.ma,
+        label: nationality.ten_vn,
+      })),
+    [nationalities]
+  );
+
+  const selectedCourse = useMemo(() => {
+    if (!courseId) return null;
+    return courses.find((c) => c.ma_kh === courseId);
+  }, [courses, courseId]);
+
+  // Format date from ISO string to display format (DD/MM/YYYY)
+  const formatDateForDisplay = (isoString) => {
+    if (!isoString) return "";
+    try {
+      const date = new Date(isoString);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      return isoString;
+    }
+  };
+
+  // Chuyển ISO string -> giá trị cho input datetime-local (YYYY-MM-DDTHH:mm)
+  const formatToDateTimeLocal = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Update course info when course is selected
+  useEffect(() => {
+    if (selectedCourse && courseId) {
+      methods.setValue("gplxClass", selectedCourse.hang_gplx || "");
+      methods.setValue("trainingClass", selectedCourse.hang_dt || "");
+      methods.setValue("totalStudents", selectedCourse.tong_so_hv || "");
+      methods.setValue(
+        "openingDate",
+        formatToDateTimeLocal(selectedCourse.ngay_kg)
+      );
+      methods.setValue(
+        "closingDate",
+        formatToDateTimeLocal(selectedCourse.ngay_bg)
+      );
+      methods.setValue(
+        "profileReceiveDate",
+        formatToDateTimeLocal(selectedCourse.ngay_nhan_hs)
+      );
+      methods.setValue("minimumAge", selectedCourse.tuoi_toi_thieu || "18");
+    }
+  }, [courseId, selectedCourse, methods]);
+
+  // Sync printName with fullName - luôn sync khi fullName thay đổi
+  useEffect(() => {
+    if (fullName !== undefined) {
+      methods.setValue("printName", fullName, { shouldValidate: true });
+    }
+  }, [fullName, methods]);
+
+  // Initialize profile types when data is loaded
+  useEffect(() => {
+    if (profileTypes.length > 0) {
+      const currentProfileTypes = methods.getValues("profileTypes") || {};
+      const newProfileTypes = { ...currentProfileTypes };
+
+      // Initialize all profile types to true if not already set
+      profileTypes.forEach((type) => {
+        if (!(type.ma_loai_hs in newProfileTypes)) {
+          newProfileTypes[type.ma_loai_hs] = true;
+        }
+      });
+
+      methods.setValue("profileTypes", newProfileTypes);
+    }
+  }, [profileTypes, methods]);
+
+  // Watch profileTypes to trigger re-render when values change
+  // Sử dụng useWatch để đảm bảo re-render khi nested fields thay đổi
+  const watchedProfileTypes =
+    useWatch({
+      control: methods.control,
+      name: "profileTypes",
+      defaultValue: {},
+    }) || {};
+
+  // Check if all profile types are selected - tính toán trực tiếp để đảm bảo cập nhật
+  const allProfileTypesSelected =
+    profileTypes.length > 0 &&
+    profileTypes.every((type) => watchedProfileTypes[type.ma_loai_hs] === true);
+
+  // Handle select all / deselect all
+  const handleSelectAll = () => {
+    const newValue = !allProfileTypesSelected;
+
+    // Set từng field riêng để trigger re-render cho từng checkbox
+    profileTypes.forEach((type) => {
+      methods.setValue(`profileTypes.${type.ma_loai_hs}`, newValue, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    });
+  };
+
+  const courseOptions = useMemo(
+    () =>
+      courses.map((course) => ({
+        value: course.ma_kh,
+        label: `${course.ma_kh || ""} - ${
+          course.ten_kh || ""
+        } (ngày KG: ${formatDateForDisplay(course.ngay_kg)})`,
+      })),
+    [courses]
+  );
+
+  const studentColumns = useMemo(
+    () => [
+      {
+        header: "STT",
+        cell: ({ row }) => row.index + 1,
+      },
+      { accessorKey: "profileNumber", header: "Số hồ sơ" },
+      { accessorKey: "fullName", header: "Họ và tên" },
+      { accessorKey: "dateOfBirth", header: "Ngày sinh" },
+      { accessorKey: "gender", header: "Giới tính" },
+      { accessorKey: "nationality", header: "Quốc tịch" },
+      { accessorKey: "idCard", header: "CMT/HC" },
+      {
+        accessorKey: "permanentAddress",
+        header: "Nơi đăng ký HKTT",
+      },
+      { accessorKey: "currentAddress", header: "Nơi cư trú" },
+      { accessorKey: "imagePath", header: "Đường dẫn ảnh" },
+      { accessorKey: "receiveDate", header: "Ngày nhận HS" },
+    ],
+    []
+  );
+
+  if (createStudentProfile.isPending) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600">Đang tải dữ liệu...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-[calc(100vh-64px)] bg-gray-50">
+      <PageHeader
+        title="Thu nhận Hồ sơ cấp mới"
+        sectionTitle="Thông tin Hồ sơ"
+        sectionDescription="Vui lòng điền đầy đủ thông tin các trường có dấu *"
+        icon={FileText}
+      />
+
+      <div className="container mx-auto px-4 sm:px-6 py-4">
+        <Form methods={methods} onSubmit={onSubmit} className="space-y-6">
+          {/* Section 1: Chọn khóa học */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Chọn khóa học
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="md:col-span-2 lg:col-span-2">
+                <SingleSelect
+                  name="courseId"
+                  label="Khóa học"
+                  options={courseOptions}
+                  placeholder={
+                    isLoadingCourses
+                      ? "Đang tải danh sách khóa học..."
+                      : courseOptions.length === 0
+                      ? "Không có khóa học"
+                      : "Chọn khóa học"
+                  }
+                  disabled={isLoadingCourses}
+                  required
+                />
+              </div>
+              <Input
+                name="gplxClass"
+                label="Hạng GPLX"
+                disabled
+                placeholder="Chọn khóa học để hiển thị"
+              />
+              <Input
+                name="minimumAge"
+                label="Tuổi tối thiểu"
+                type="number"
+                disabled
+              />
+              <DatePicker name="openingDate" label="Ngày KG" disabled />
+              <DatePicker name="closingDate" label="Ngày BG" disabled />
+              <Input
+                name="trainingClass"
+                label="Hạng ĐT"
+                disabled
+                placeholder="Chọn khóa học để hiển thị"
+              />
+              <DatePicker
+                name="profileReceiveDate"
+                label="Ngày nhận HS"
+                disabled
+              />
+              <Input
+                name="totalStudents"
+                label="Tổng số HV"
+                type="number"
+                disabled
+              />
+              <Input
+                name="currentStudents"
+                label="Số HV hiện tại"
+                type="number"
+                disabled
+              />
+            </div>
+          </div>
+
+          {/* Section 2: Thông tin Hồ sơ */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Thông tin Hồ sơ
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                {/* <div className="grid grid-cols-2 gap-4"> */}
+                <Input name="registrationCode" label="Mã đăng ký" disabled />
+                {/* <Input name="profileNumber" label="Số Hồ sơ" /> */}
+                {/* </div> */}
+                <Input name="fullName" label="Họ và tên" required />
+                <Input name="printName" label="Tên in" disabled />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DatePicker
+                    name="dateOfBirth"
+                    label="Ngày sinh"
+                    required
+                    type="date"
+                    placeholder="mm/dd/yyyy"
+                  />
+                  <SingleSelect
+                    name="gender"
+                    label="Giới tính"
+                    options={GENDERS}
+                    placeholder="Chọn giới tính"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <SingleSelect
+                    name="nationality"
+                    label="Quốc tịch"
+                    options={nationalityOptions}
+                    placeholder={
+                      isLoadingNationalities
+                        ? "Đang tải danh sách quốc tịch..."
+                        : nationalityOptions.length === 0
+                        ? "Không có dữ liệu"
+                        : "Chọn quốc tịch"
+                    }
+                    disabled={isLoadingNationalities}
+                    required
+                  />
+                  <Input name="idCard" label="CMT/HC" required />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DatePicker
+                    name="idCardIssueDate"
+                    label="Ngày cấp"
+                    type="date"
+                    placeholder="mm/dd/yyyy"
+                  />
+                  <Input name="idCardIssuePlace" label="Nơi cấp" />
+                </div>
+                <div className="border border-gray-200 p-4 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Nơi đăng ký hộ khẩu thường trú
+                  </label>
+                  <div className="space-y-2">
+                    <SingleSelect
+                      name="permanentAddress"
+                      label="Địa chỉ"
+                      options={administrativeUnitOptions}
+                      placeholder={
+                        isLoadingAdministrativeUnits
+                          ? "Đang tải danh sách..."
+                          : "Chọn địa chỉ"
+                      }
+                      disabled={isLoadingAdministrativeUnits}
+                      required
+                    />
+                    <Input
+                      name="permanentAddressDetail"
+                      label="Chi tiết"
+                      placeholder="Nhập chi tiết địa chỉ"
+                    />
+                  </div>
+                </div>
+                <div className="border border-gray-200 p-4 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Nơi cư trú
+                  </label>
+                  <div className="space-y-2">
+                    <SingleSelect
+                      name="currentAddress"
+                      label="Địa chỉ"
+                      options={administrativeUnitOptions}
+                      placeholder={
+                        isLoadingAdministrativeUnits
+                          ? "Đang tải danh sách..."
+                          : "Chọn địa chỉ"
+                      }
+                      disabled={isLoadingAdministrativeUnits}
+                      required
+                    />
+                    <Input
+                      name="currentAddressDetail"
+                      label="Chi tiết"
+                      placeholder="Nhập chi tiết địa chỉ"
+                    />
+                  </div>
+                </div>
+                <Textarea name="notes" label="Ghi chú" rows={3} />
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                {/* Giấy phép lái xe hiện có */}
+                <div className="border border-gray-200 p-4 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Giấy phép lái xe hiện có
+                  </label>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <Input
+                        name="existingLicenseNumber"
+                        label="Số GPLX"
+                        placeholder="Nhập số GPLX"
+                      />
+                      <SingleSelect
+                        name="existingLicenseStatus"
+                        label="Loại"
+                        options={[
+                          { value: "Moi", label: "Mới" },
+                          { value: "Cu", label: "Cũ" },
+                        ]}
+                        placeholder="Chọn loại"
+                      />
+                      <SingleSelect
+                        name="existingLicenseClass"
+                        label="Hạng GPLX"
+                        options={gplxClasses}
+                        placeholder={
+                          isLoadingGplxClasses
+                            ? "Đang tải..."
+                            : gplxClasses.length === 0
+                            ? "Không có dữ liệu"
+                            : "Chọn hạng"
+                        }
+                        disabled={isLoadingGplxClasses}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <DatePicker
+                        name="existingLicenseTestDate"
+                        label="Ngày TT"
+                        placeholder="mm/dd/yyyy"
+                        type="date"
+                      />
+                      <DatePicker
+                        name="existingLicenseIssueDate"
+                        label="Ngày cấp"
+                        placeholder="mm/dd/yyyy"
+                        type="date"
+                      />
+                      <DatePicker
+                        name="existingLicenseExpiryDate"
+                        label="Ngày HH"
+                        placeholder="mm/dd/yyyy"
+                        type="date"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        name="existingLicenseIssuingUnit"
+                        label="Đơn vị cấp"
+                        placeholder="Nhập đơn vị cấp"
+                      />
+                      <SingleSelect
+                        name="existingLicenseIssuingCountry"
+                        label="Nơi cấp (NN)"
+                        options={nationalityOptions}
+                        placeholder={
+                          isLoadingNationalities
+                            ? "Đang tải..."
+                            : "Chọn nơi cấp"
+                        }
+                        disabled={isLoadingNationalities}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dành cho nâng hạng */}
+                <div className="border border-gray-200 p-4 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Dành cho nâng hạng
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Input
+                      name="drivingYears"
+                      label="Số năm lái xe"
+                      type="number"
+                      placeholder="25"
+                    />
+                    <Input
+                      name="drivingKilometers"
+                      label="Số km lái xe"
+                      type="number"
+                      placeholder="25000"
+                    />
+                  </div>
+                </div>
+
+                {/* Ảnh chân dung */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Ảnh chân dung (3x4)
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-white">
+                    <div className="flex flex-col items-center gap-3">
+                      <FileImage className="w-12 h-12 text-gray-400" />
+                      <div className="flex gap-2">
+                        <Button type="button" variant="outline" size="sm">
+                          <Camera className="w-4 h-4 mr-1" />
+                          Chụp ảnh
+                        </Button>
+                        <Button type="button" variant="outline" size="sm">
+                          <FolderOpen className="w-4 h-4 mr-1" />
+                          Chọn tệp...
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Giấy tờ kèm theo */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Giấy tờ kèm theo
+                    </label>
+                    {profileTypes.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSelectAll}
+                      >
+                        {allProfileTypesSelected
+                          ? "Bỏ chọn tất cả"
+                          : "Chọn tất cả"}
+                      </Button>
+                    )}
+                  </div>
+                  {isLoadingProfileTypes ? (
+                    <div className="text-sm text-gray-500">
+                      Đang tải danh sách...
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {profileTypes.map((type) => (
+                        <Checkbox
+                          key={type.ma_loai_hs}
+                          name={`profileTypes.${type.ma_loai_hs}`}
+                          label={type.ten_loai_hs}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Submit button */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pb-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="w-full sm:w-auto"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Quay lại
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={resetApplicantSection}
+              className="w-full sm:w-auto"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Nhập mới
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={createStudentProfile.isPending}
+              className="w-full sm:w-auto"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Lưu
+            </Button>
+          </div>
+
+          {/* Section 3: Danh sách học viên */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Danh sách học viên của khóa {selectedCourse?.ma_kh || ""}
+              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <input
+                  type="text"
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  placeholder="Tìm kiếm học viên..."
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+                <span className="sm:ml-auto text-sm text-gray-600">
+                  Tổng số bản ghi: {filteredCourseStudents.length}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 mb-4">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                Xem - Sửa
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                Xóa
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Printer className="w-4 h-4 mr-1" />
+                In giấy hẹn dự Khai giảng
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <Printer className="w-4 h-4 mr-1" />
+                In Tờ khai
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-1" />
+                Kết xuất Excel
+              </Button>
+            </div>
+            <Table
+              data={filteredCourseStudents}
+              columns={studentColumns}
+              enablePagination
+              enableSorting
+            />
+          </div>
+        </Form>
+      </div>
+
+      {/* Modal thông báo */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Thông báo"
+        size="md"
+        footer={<Button onClick={() => setIsModalOpen(false)}>OK</Button>}
+      >
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+              <span className="text-red-600 text-xl font-bold">×</span>
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="text-gray-700">{modalMessage}</p>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
