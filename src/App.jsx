@@ -5,6 +5,7 @@ import { Layout } from "./components/layout";
 import HomePage from "./pages/HomePage";
 import AddCoursePage from "./pages/AddCoursePage";
 import AddStudentPage from "./pages/AddStudentPage";
+import EditStudentPage from "./pages/EditStudentPage";
 import LoginPage from "./pages/LoginPage";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route index element={<HomePage />} />
                 <Route path="khoa-hoc/them" element={<AddCoursePage />} />
                 <Route path="hoc-vien/them" element={<AddStudentPage />} />
+                <Route path="hoc-vien/chinh-sua/:maDK" element={<EditStudentPage />} />
               </Routes>
             </Layout>
           }

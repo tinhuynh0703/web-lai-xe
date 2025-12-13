@@ -30,10 +30,9 @@ export default function AddCoursePage() {
 
   const methods = useForm({
     resolver: yupResolver(trainingCourseSchema),
-    mode: "onChange", // Validate realtime khi người dùng gõ
-    reValidateMode: "onChange", // Re-validate khi giá trị thay đổi
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
-      // Chỉ lưu mã, không lưu tên
       department: "48",
       trainingFacility: "48012",
       courseCode: "",
@@ -44,8 +43,6 @@ export default function AddCoursePage() {
       totalStudents: "",
       trainingObjectives: "",
       notes: "",
-
-      // Right column
       courseName: "",
       trainingType: "",
       decisionDateKG: "",
@@ -54,7 +51,6 @@ export default function AddCoursePage() {
     },
   });
 
-  // Watch giá trị hạng đào tạo để load loại hình đào tạo
   const selectedTrainingClass = methods.watch("trainingClass");
   const selectedTrainingClassOption = useMemo(
     () =>
@@ -63,20 +59,17 @@ export default function AddCoursePage() {
     [trainingClasses, selectedTrainingClass]
   );
 
-  // Lấy danh sách loại hình đào tạo dựa trên mã hạng đào tạo đã chọn
   const { data: trainingTypes = [], isLoading: isLoadingTrainingTypes } =
     useTrainingTypes(
       selectedTrainingClassOption?.maHangMoi || selectedTrainingClass
     );
 
-  // Reset loại hình đào tạo khi thay đổi hạng đào tạo
   useEffect(() => {
     if (selectedTrainingClass) {
       methods.setValue("trainingType", "");
     }
   }, [selectedTrainingClass, methods]);
 
-  // Helper function để convert date string (có thể kèm giờ) sang ISO format
   const convertToISODate = (dateString) => {
     if (!dateString || dateString.trim() === "") {
       return null;
@@ -86,7 +79,6 @@ export default function AddCoursePage() {
     return date.toISOString();
   };
 
-  // Helper function để convert string sang number
   const convertToNumber = (value) => {
     if (!value || value === "") {
       return 0;
@@ -129,10 +121,6 @@ export default function AddCoursePage() {
 
   const handleNewEntry = () => {
     methods.reset();
-  };
-
-  const handleExit = () => {
-    navigate(-1);
   };
 
   return (
@@ -312,7 +300,7 @@ export default function AddCoursePage() {
                 onClick={() => navigate(-1)}
                 className="min-w-[110px] w-full sm:w-auto"
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Quay lại
               </Button>
 
@@ -323,7 +311,7 @@ export default function AddCoursePage() {
                 onClick={handleNewEntry}
                 className="min-w-[130px] w-full sm:w-auto"
               >
-                <RotateCcw className="w-5 h-5 mr-2" />
+                <RotateCcw className="w-4 h-4 mr-2" />
                 Nhập mới
               </Button>
 
@@ -333,7 +321,7 @@ export default function AddCoursePage() {
                 size="md"
                 className="min-w-[180px] w-full sm:w-auto"
               >
-                <ClipboardCheck className="w-5 h-5 mr-2" />
+                <ClipboardCheck className="w-4 h-4 mr-2" />
                 Cập nhật lịch học
               </Button>
 
@@ -343,7 +331,7 @@ export default function AddCoursePage() {
                 size="md"
                 className="min-w-[200px] w-full sm:w-auto"
               >
-                <Users className="w-5 h-5 mr-2" />
+                <Users className="w-4 h-4 mr-2" />
                 Khóa học - giáo viên
               </Button>
 
@@ -352,9 +340,9 @@ export default function AddCoursePage() {
                 variant="primary"
                 size="md"
                 loading={createCourse.isPending}
-                className="min-w-[120px] w-full sm:w-auto"
+                className="w-full sm:w-auto"
               >
-                <Save className="w-5 h-5 mr-2" />
+                <Save className="w-4 h-4 mr-2" />
                 Lưu
               </Button>
             </div>

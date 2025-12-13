@@ -23,7 +23,7 @@ export function setupInterceptors() {
     
     // Log response trong development
     if (import.meta.env.DEV) {
-      console.log('API Response:', response)
+      // console.log('API Response:', response)
     }
     
     return response

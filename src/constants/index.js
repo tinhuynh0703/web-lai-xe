@@ -31,5 +31,6 @@ export const ROUTES = {
   LOGIN: "/login",
   COURSES: "/khoa-hoc/them",
   STUDENTS: "/hoc-vien/them",
+  EDIT_STUDENT: "/hoc-vien/chinh-sua/:maDK",
   DASHBOARD: "/dashboard",
 };

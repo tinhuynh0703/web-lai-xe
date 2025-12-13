@@ -19,6 +19,7 @@ export function Table({
   enableSorting = true,
   enableFiltering = false,
   className,
+  onRowClick,
 }) {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -96,7 +97,11 @@ export function Table({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className={cn(
+                      "hover:bg-gray-50 transition-colors",
+                      onRowClick && "cursor-pointer"
+                    )}
+                    onClick={() => onRowClick && onRowClick(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
@@ -118,8 +123,8 @@ export function Table({
       </div>
 
       {enablePagination && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-t border-gray-200">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => table.setPageIndex(0)}
@@ -153,7 +158,7 @@ export function Table({
               Cuối
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
             <span className="text-sm text-gray-700">
               Trang{" "}
               <strong>

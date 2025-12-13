@@ -11,7 +11,7 @@ export const SingleSelect = forwardRef(function SingleSelect(
     name,
     label,
     options = [],
-    placeholder = "Chọn một tùy chọn",
+    placeholder = "Chọn loại",
     className,
     disabled,
     required,

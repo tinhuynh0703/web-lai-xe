@@ -3,7 +3,7 @@
  */
 export * from "./useCourses";
 export * from "./useStudents";
-export { useCreateStudentProfile, useStudentsByCourse } from "./useStudents";
+export { useCreateStudentProfile, useStudentsByCourse, useStudentDetail, useUpdateStudentProfile } from "./useStudents";
 export { useTrainingClasses } from "./useTrainingClasses";
 export { useTrainingTypes } from "./useTrainingTypes";
 export { useProfileTypes } from "./useProfileTypes";

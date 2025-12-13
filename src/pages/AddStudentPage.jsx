@@ -7,7 +7,6 @@ import {
   FileImage,
   FolderOpen,
   FileText,
-  Eye,
   Trash2,
   Printer,
   FileSpreadsheet,
@@ -39,6 +38,7 @@ import {
   useTrainingClasses,
 } from "../hooks";
 import { showSuccess, showError } from "../utils";
+import { ROUTES } from "../constants";
 
 export default function AddStudentPage() {
   const createStudentProfile = useCreateStudentProfile();
@@ -87,12 +87,9 @@ export default function AddStudentPage() {
       existingLicenseExpiryDate: "",
       existingLicenseIssuingUnit: "",
       existingLicenseIssuingCountry: "",
-      // profileNumber: "",
 
-      // Giấy tờ kèm theo (dynamic từ API)
       profileTypes: {},
 
-      // Ảnh chân dung
       drivingYears: "",
       drivingKilometers: "",
     },
@@ -130,8 +127,8 @@ export default function AddStudentPage() {
     const currentValues = methods.getValues();
     methods.reset(
       {
-        ...currentValues, // giữ nguyên Chọn khóa học
-        ...getApplicantDefaultValues(), // reset Thông tin Hồ sơ
+        ...currentValues, 
+        ...getApplicantDefaultValues(),
       },
       {
         keepErrors: false,
@@ -141,14 +138,11 @@ export default function AddStudentPage() {
     );
   };
 
-  // Watch courseId để fetch danh sách học viên
   const courseId = methods.watch("courseId");
 
-  // Fetch danh sách học viên từ API
   const { data: studentsData = [], isLoading: isLoadingStudents } =
     useStudentsByCourse(courseId);
 
-  // Format date từ YYYYMMDD sang DD/MM/YYYY
   const formatDateFromYYYYMMDD = (dateString) => {
     if (!dateString || dateString.length !== 8) return "-";
     try {
@@ -161,7 +155,6 @@ export default function AddStudentPage() {
     }
   };
 
-  // Format date từ ISO string sang DD/MM/YYYY
   const formatDateFromISO = (isoString) => {
     if (!isoString) return "-";
     try {
@@ -175,28 +168,26 @@ export default function AddStudentPage() {
     }
   };
 
-  // Format giới tính từ F/M sang Nam/Nữ
   const formatGender = (gender) => {
     if (!gender) return "-";
-    if (gender === "F" || gender === "f") return "Nữ";
-    if (gender === "M" || gender === "m") return "Nam";
+    if (gender === "F") return "Nữ";
+    if (gender === "M") return "Nam";
     return gender;
   };
 
-  // Map dữ liệu từ API sang format của bảng
   const courseStudents = useMemo(() => {
     if (!studentsData || studentsData.length === 0) return [];
 
     return studentsData.map((student) => ({
-      // profileNumber: student.ma_dk || "-",
+      maDK: student.ma_dk || student.so_cmt || "", // Lưu ma_dk để dùng cho API
       fullName: student.ho_va_ten || "-",
       dateOfBirth: formatDateFromYYYYMMDD(student.ngay_sinh),
       gender: formatGender(student.gioi_tinh),
-      nationality: "-", // Không có trong API response
+      nationality: "-",
       idCard: student.so_cmt || "-",
       permanentAddress: student.noi_thuong_tru || "-",
       currentAddress: student.noi_cu_tru || "-",
-      imagePath: "-", // Không có trong API response
+      imagePath: "-", 
       receiveDate: formatDateFromISO(student.ngay_nhan_hso),
     }));
   }, [studentsData]);
@@ -206,7 +197,6 @@ export default function AddStudentPage() {
     const term = studentSearch.toLowerCase();
     return courseStudents.filter((s) =>
       [
-        s.profileNumber,
         s.fullName,
         s.idCard,
         s.permanentAddress,
@@ -217,11 +207,9 @@ export default function AddStudentPage() {
     );
   }, [courseStudents, studentSearch]);
 
-  // Convert date (with optional time) to ISO string format
   const convertDateToISO = (dateString) => {
     if (!dateString) return null;
 
-    // Nếu chỉ có yyyy-mm-dd thì set giờ mặc định 00:00:00 UTC để không lệch ngày
     const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
     const isoString = isDateOnly
       ? new Date(`${dateString}T00:00:00.000Z`)
@@ -231,7 +219,6 @@ export default function AddStudentPage() {
     return isoString.toISOString();
   };
 
-  // Convert date from YYYY-MM-DD to YYYYMMDD (required for ngay_sinh)
   const formatDateToYYYYMMDD = (dateString) => {
     if (!dateString) return "";
     const normalized = dateString.includes("T")
@@ -250,17 +237,14 @@ export default function AddStudentPage() {
     }
   };
 
-  // Find administrative unit by value (ma_dvhc or ma_dv)
   const findAdministrativeUnit = (value) => {
     if (!value) return null;
     return administrativeUnits.find(
-      (unit) => unit.ma_dvhc === value || unit.ma_dv === value
+      (unit) => unit.ma_dvhc === value
     );
   };
 
   const onSubmit = (data) => {
-    console.log(data);
-    // Kiểm tra trùng CMT/HC trong khóa học
     const duplicateStudent = courseStudents.find(
       (s) => s.idCard === data.idCard
     );
@@ -272,11 +256,9 @@ export default function AddStudentPage() {
       return;
     }
 
-    // Tìm administrative units
     const permanentAddressUnit = findAdministrativeUnit(data.permanentAddress);
     const currentAddressUnit = findAdministrativeUnit(data.currentAddress);
 
-    // Map profileTypes thành giay_tos (chỉ lấy những cái đã được chọn)
     const giayTos = [];
     if (data.profileTypes) {
       Object.entries(data.profileTypes).forEach(([maLoaiHs, isSelected]) => {
@@ -294,12 +276,6 @@ export default function AddStudentPage() {
       });
     }
 
-    // Tạo đường dẫn ảnh: \\192.168.100.250\im_gplx\maKhoaHoc\maDk
-    const duongDanAnh = data.registrationCode
-      ? `\\\\192.168.100.250\\im_gplx\\${data.courseId}\\${data.registrationCode}`
-      : `\\\\192.168.100.250\\im_gplx\\${data.courseId}\\`;
-
-    // Map dữ liệu sang format API
     const payload = {
       ma_csdt: "48012",
       ho_dem_nlx: "",
@@ -312,16 +288,15 @@ export default function AddStudentPage() {
       ghi_chu: data.notes || "",
       gioi_tinh: data.gender || "",
       so_cmnd_cu: "",
-      // ma_loai_hs: data.profileNumber ? parseInt(data.profileNumber) || 0 : 0,
       hang_gplx: data.gplxClass || "",
       hang_dao_tao: data.trainingClass || "",
       ma_khoa_hoc: data.courseId || "",
       nam_hoc_lx: 0,
       noi_tt_ma_dvhc:
-        permanentAddressUnit?.ma_dvhc || permanentAddressUnit?.ma_dv || "",
+        permanentAddressUnit?.ma_dvhc || "",
       noi_tt_ma_dvql: permanentAddressUnit?.ma_dvql || "",
       noi_ct_ma_dvhc:
-        currentAddressUnit?.ma_dvhc || currentAddressUnit?.ma_dv || "",
+        currentAddressUnit?.ma_dvhc || "",
       noi_ct_ma_dvql: currentAddressUnit?.ma_dvql || "",
       duong_dan_anh: "",
       so_nam_lx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
@@ -331,11 +306,7 @@ export default function AddStudentPage() {
       giay_tos: giayTos,
     };
 
-    console.log("Form data:", data);
-    console.log("Payload:", payload);
-    console.log("ghi_chu value:", payload.ghi_chu);
 
-    // Gọi API qua hook
     createStudentProfile.mutate(payload, {
       onSuccess: () => {
         showSuccess("Thêm học viên thành công!");
@@ -349,42 +320,34 @@ export default function AddStudentPage() {
     });
   };
 
-  // Watch fullName
   const fullName = methods.watch("fullName");
 
-  // Get courses list (API call with empty body)
   const { data: courses = [], isLoading: isLoadingCourses } =
     useCoursesByDateRange();
 
-  // Get profile types from API
   const { data: profileTypes = [], isLoading: isLoadingProfileTypes } =
     useProfileTypes();
 
-  // Get administrative units from API
   const {
     data: administrativeUnits = [],
     isLoading: isLoadingAdministrativeUnits,
   } = useAdministrativeUnits();
 
-  // Get nationalities from API
   const { data: nationalities = [], isLoading: isLoadingNationalities } =
     useNationalities();
 
-  // Get GPLX classes from API (ma_hang, ma_hang_moi)
   const { data: gplxClasses = [], isLoading: isLoadingGplxClasses } =
     useTrainingClasses();
 
-  // Map administrative units to options for SingleSelect
   const administrativeUnitOptions = useMemo(
     () =>
       administrativeUnits.map((unit) => ({
-        value: unit.ma_dvhc || unit.ma_dv,
-        label: unit.ten_day_du || unit.ten_dvhc || unit.ten_ngan_gon,
+        value: unit.ma_dvhc,
+        label: unit.ten_day_du
       })),
     [administrativeUnits]
   );
 
-  // Map nationalities to options for SingleSelect
   const nationalityOptions = useMemo(
     () =>
       nationalities.map((nationality) => ({
@@ -399,7 +362,6 @@ export default function AddStudentPage() {
     return courses.find((c) => c.ma_kh === courseId);
   }, [courses, courseId]);
 
-  // Format date from ISO string to display format (DD/MM/YYYY)
   const formatDateForDisplay = (isoString) => {
     if (!isoString) return "";
     try {
@@ -413,7 +375,6 @@ export default function AddStudentPage() {
     }
   };
 
-  // Chuyển ISO string -> giá trị cho input datetime-local (YYYY-MM-DDTHH:mm)
   const formatToDateTimeLocal = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -426,7 +387,6 @@ export default function AddStudentPage() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  // Update course info when course is selected
   useEffect(() => {
     if (selectedCourse && courseId) {
       methods.setValue("gplxClass", selectedCourse.hang_gplx || "");
@@ -448,20 +408,17 @@ export default function AddStudentPage() {
     }
   }, [courseId, selectedCourse, methods]);
 
-  // Sync printName with fullName - luôn sync khi fullName thay đổi
   useEffect(() => {
     if (fullName !== undefined) {
       methods.setValue("printName", fullName, { shouldValidate: true });
     }
   }, [fullName, methods]);
 
-  // Initialize profile types when data is loaded
   useEffect(() => {
     if (profileTypes.length > 0) {
       const currentProfileTypes = methods.getValues("profileTypes") || {};
       const newProfileTypes = { ...currentProfileTypes };
 
-      // Initialize all profile types to true if not already set
       profileTypes.forEach((type) => {
         if (!(type.ma_loai_hs in newProfileTypes)) {
           newProfileTypes[type.ma_loai_hs] = true;
@@ -472,8 +429,6 @@ export default function AddStudentPage() {
     }
   }, [profileTypes, methods]);
 
-  // Watch profileTypes to trigger re-render when values change
-  // Sử dụng useWatch để đảm bảo re-render khi nested fields thay đổi
   const watchedProfileTypes =
     useWatch({
       control: methods.control,
@@ -481,16 +436,13 @@ export default function AddStudentPage() {
       defaultValue: {},
     }) || {};
 
-  // Check if all profile types are selected - tính toán trực tiếp để đảm bảo cập nhật
   const allProfileTypesSelected =
     profileTypes.length > 0 &&
     profileTypes.every((type) => watchedProfileTypes[type.ma_loai_hs] === true);
 
-  // Handle select all / deselect all
   const handleSelectAll = () => {
     const newValue = !allProfileTypesSelected;
 
-    // Set từng field riêng để trigger re-render cho từng checkbox
     profileTypes.forEach((type) => {
       methods.setValue(`profileTypes.${type.ma_loai_hs}`, newValue, {
         shouldValidate: true,
@@ -516,36 +468,57 @@ export default function AddStudentPage() {
       {
         header: "STT",
         cell: ({ row }) => row.index + 1,
+        enableSorting: false,
       },
-      { accessorKey: "profileNumber", header: "Số hồ sơ" },
-      { accessorKey: "fullName", header: "Họ và tên" },
-      { accessorKey: "dateOfBirth", header: "Ngày sinh" },
-      { accessorKey: "gender", header: "Giới tính" },
-      { accessorKey: "nationality", header: "Quốc tịch" },
-      { accessorKey: "idCard", header: "CMT/HC" },
+      { 
+        accessorKey: "fullName", 
+        header: "Họ và tên",
+        enableSorting: true,
+      },
+      { 
+        accessorKey: "dateOfBirth", 
+        header: "Ngày sinh",
+        enableSorting: false,
+      },
+      { 
+        accessorKey: "gender", 
+        header: "Giới tính",
+        enableSorting: true,
+      },
+      { 
+        accessorKey: "nationality", 
+        header: "Quốc tịch",
+        enableSorting: false,
+      },
+      { 
+        accessorKey: "idCard", 
+        header: "CMT/HC",
+        enableSorting: false,
+      },
       {
         accessorKey: "permanentAddress",
         header: "Nơi đăng ký HKTT",
+        enableSorting: false,
       },
-      { accessorKey: "currentAddress", header: "Nơi cư trú" },
-      { accessorKey: "imagePath", header: "Đường dẫn ảnh" },
-      { accessorKey: "receiveDate", header: "Ngày nhận HS" },
+      { 
+        accessorKey: "currentAddress", 
+        header: "Nơi cư trú",
+        enableSorting: false,
+      },
+      { 
+        accessorKey: "imagePath", 
+        header: "Đường dẫn ảnh",
+        enableSorting: false,
+      },
+      { 
+        accessorKey: "receiveDate", 
+        header: "Ngày nhận HS",
+        enableSorting: true,
+      },
     ],
     []
   );
 
-  if (createStudentProfile.isPending) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-gray-600">Đang tải dữ liệu...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50">
@@ -729,6 +702,29 @@ export default function AddStudentPage() {
 
               {/* Right Column */}
               <div className="space-y-4">
+                
+                {/* Ảnh chân dung */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Ảnh chân dung (3x4)
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-white">
+                    <div className="flex flex-col items-center gap-3">
+                      <FileImage className="w-12 h-12 text-gray-400" />
+                      <div className="flex gap-2">
+                        <Button type="button" variant="outline" size="sm">
+                          <Camera className="w-4 h-4 mr-1" />
+                          Chụp ảnh
+                        </Button>
+                        <Button type="button" variant="outline" size="sm">
+                          <FolderOpen className="w-4 h-4 mr-1" />
+                          Chọn tệp...
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Giấy phép lái xe hiện có */}
                 <div className="border border-gray-200 p-4 rounded-lg bg-gray-50">
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -826,28 +822,6 @@ export default function AddStudentPage() {
                   </div>
                 </div>
 
-                {/* Ảnh chân dung */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Ảnh chân dung (3x4)
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-white">
-                    <div className="flex flex-col items-center gap-3">
-                      <FileImage className="w-12 h-12 text-gray-400" />
-                      <div className="flex gap-2">
-                        <Button type="button" variant="outline" size="sm">
-                          <Camera className="w-4 h-4 mr-1" />
-                          Chụp ảnh
-                        </Button>
-                        <Button type="button" variant="outline" size="sm">
-                          <FolderOpen className="w-4 h-4 mr-1" />
-                          Chọn tệp...
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Giấy tờ kèm theo */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -940,15 +914,6 @@ export default function AddStudentPage() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 mb-4">
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto"
-              >
-                <Eye className="w-4 h-4 mr-1" />
-                Xem - Sửa
-              </Button>
-              <Button
-                type="button"
                 variant="danger"
                 size="sm"
                 className="w-full sm:w-auto"
@@ -989,6 +954,11 @@ export default function AddStudentPage() {
               columns={studentColumns}
               enablePagination
               enableSorting
+              onRowClick={(row) => {
+                if (row.maDK) {
+                  navigate(`/hoc-vien/chinh-sua/${row.maDK}`);
+                }
+              }}
             />
           </div>
         </Form>
@@ -1003,7 +973,7 @@ export default function AddStudentPage() {
         footer={<Button onClick={() => setIsModalOpen(false)}>OK</Button>}
       >
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
               <span className="text-red-600 text-xl font-bold">×</span>
             </div>

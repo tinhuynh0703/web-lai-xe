@@ -44,20 +44,48 @@ export function useStudentsByCourse(maKH) {
 }
 
 /**
- * Hook để cập nhật học viên
- * Lưu ý: API method update() không còn tồn tại
+ * Hook để lấy thông tin chi tiết học viên theo mã đăng ký
  */
-export function useUpdateStudent() {
+export function useStudentDetail(maDK) {
+  return useQuery({
+    queryKey: ["students", "detail", maDK],
+    queryFn: async () => {
+      try {
+        const data = await studentsApi.getStudentDetail(maDK);
+        return data;
+      } catch (error) {
+        console.warn("Không thể lấy thông tin học viên:", error.message);
+        throw error;
+      }
+    },
+    enabled: !!maDK, // Chỉ fetch khi có maDK
+    staleTime: 0, // Không cache để luôn lấy data mới nhất
+  });
+}
+
+/**
+ * Hook để cập nhật thông tin học viên (API /NguoiLxes với POST)
+ */
+export function useUpdateStudentProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }) => {
-      console.warn("API method update() không còn tồn tại");
-      throw new Error("API method không còn tồn tại");
-    },
+    mutationFn: (data) => studentsApi.updateStudent(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["students"] });
-      queryClient.invalidateQueries({ queryKey: ["students", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["courses", "byDateRange"] });
+      // Invalidate danh sách học viên của khóa học
+      if (variables.ma_khoa_hoc) {
+        queryClient.invalidateQueries({
+          queryKey: ["students", "byCourse", variables.ma_khoa_hoc],
+        });
+      }
+      // Invalidate thông tin chi tiết học viên
+      if (variables.ma_dk) {
+        queryClient.invalidateQueries({
+          queryKey: ["students", "detail", variables.ma_dk],
+        });
+      }
     },
   });
 }
