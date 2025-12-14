@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { AlertCircle, Calendar } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -20,14 +20,11 @@ export const DatePicker = forwardRef(function DatePicker(
   ref
 ) {
   const {
-    register,
+    control,
     formState: { errors },
   } = useFormContext();
 
   const error = errors[name];
-
-  // Tách ref của RHF ra để xử lý riêng
-  const { ref: registerRef, ...restRegister } = register(name);
 
   return (
     <div className="w-full">
@@ -41,32 +38,38 @@ export const DatePicker = forwardRef(function DatePicker(
         </label>
       )}
       <div className="relative">
-        <input
-          id={name}
-          type={type}
-          placeholder={placeholder}
-          disabled={disabled}
-          className={cn(
-            "w-full px-4 py-2.5 pl-10 border rounded-lg transition-all duration-200",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
-            "disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-500",
-            "placeholder:text-gray-400 text-gray-900",
-            "hover:border-gray-400",
-            error
-              ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
-              : "border-gray-300 bg-white",
-            className
+        <Controller
+          name={name}
+          control={control}
+          render={({ field }) => (
+            <input
+              id={name}
+              type={type}
+              placeholder={placeholder}
+              disabled={disabled}
+              className={cn(
+                "w-full px-4 py-2.5 pl-10 border rounded-lg transition-all duration-200",
+                "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                "disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-500",
+                "placeholder:text-gray-400 text-gray-900",
+                "hover:border-gray-400",
+                error
+                  ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
+                  : "border-gray-300 bg-white",
+                className
+              )}
+              {...field}
+              {...props}
+              ref={(e) => {
+                field.ref(e);
+                if (typeof ref === "function") {
+                  ref(e);
+                } else if (ref) {
+                  ref.current = e;
+                }
+              }}
+            />
           )}
-          {...restRegister}
-          {...props}
-          ref={(e) => {
-            registerRef(e);
-            if (typeof ref === "function") {
-              ref(e);
-            } else if (ref) {
-              ref.current = e;
-            }
-          }}
         />
         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
       </div>

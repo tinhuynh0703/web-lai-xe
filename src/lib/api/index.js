@@ -10,4 +10,5 @@ export {
 export { coursesApi } from "./courses";
 export { studentsApi } from "./students";
 export { danhMucsApi } from "./danhMucs";
+export { authApi } from "./auth";
 export { setupInterceptors } from "./interceptors";

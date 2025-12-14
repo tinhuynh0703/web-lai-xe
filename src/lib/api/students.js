@@ -9,7 +9,7 @@ export const studentsApi = {
   createStudent: (data) => api.post("/NguoiLxes", data),
 
   // Cập nhật thông tin học viên (cùng endpoint với create)
-  updateStudent: (data) => api.post("/NguoiLxes", data),
+  updateStudent: (data) => api.put("/NguoiLxes", data),
 
   // Lấy danh sách học viên theo mã khóa học
   getStudentsByCourse: (maKH) =>

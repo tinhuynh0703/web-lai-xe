@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import {
@@ -108,9 +108,16 @@ export default function EditStudentPage() {
     // Sử dụng setValue cho từng field để đảm bảo các component re-render
     const { setValue } = studentMethods;
     
+    // Ghép ho_dem_nlx và ten_nlx thành fullName nếu có
+    const hoDemNlx = studentData.ho_dem_nlx || "";
+    const tenNlx = studentData.ten_nlx || "";
+    const fullName = hoDemNlx && tenNlx 
+      ? `${hoDemNlx} ${tenNlx}`.trim()
+      : tenNlx || hoDemNlx || "";
+    
     setValue("registrationCode", studentData.ma_dk || "", { shouldValidate: false, shouldDirty: false });
-    setValue("fullName", studentData.ten_nlx || "", { shouldValidate: false, shouldDirty: false });
-    setValue("printName", studentData.ten_nlx || "", { shouldValidate: false, shouldDirty: false });
+    setValue("fullName", fullName, { shouldValidate: false, shouldDirty: false });
+    setValue("printName", fullName, { shouldValidate: false, shouldDirty: false });
     setValue("dateOfBirth", formatDateFromYYYYMMDDToInput(studentData.ngay_sinh), { shouldValidate: false, shouldDirty: false });
     setValue("gender", studentData.gioi_tinh || "", { shouldValidate: false, shouldDirty: false });
     setValue("nationality", studentData.ma_quoc_tich || "", { shouldValidate: false, shouldDirty: false });
@@ -147,6 +154,31 @@ export default function EditStudentPage() {
     });
   }, [studentData, profileTypes, studentMethods.setValue]);
 
+  // Sử dụng useWatch để đảm bảo component re-render khi fullName thay đổi
+  const fullName = useWatch({
+    control: studentMethods.control,
+    name: "fullName",
+  });
+
+  // Tự động điền "Tên in" khi "Họ và tên" thay đổi
+  useEffect(() => {
+    // Chỉ cập nhật khi fullName có giá trị (không phải undefined, null, hoặc empty string)
+    if (fullName) {
+      studentMethods.setValue("printName", fullName, { 
+        shouldValidate: false,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+    } else if (fullName === "") {
+      // Nếu fullName là empty string, cũng clear printName
+      studentMethods.setValue("printName", "", { 
+        shouldValidate: false,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+    }
+  }, [fullName, studentMethods]);
+
   const convertDateToISO = (dateString) => {
     if (!dateString) return null;
     const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
@@ -182,6 +214,39 @@ export default function EditStudentPage() {
     );
   };
 
+  /**
+   * Tách tên đầy đủ thành họ đệm và tên
+   * @param {string} fullName - Tên đầy đủ (ví dụ: "Huynh Tri Tin")
+   * @returns {Object} - { hoDem: "Huynh Tri", ten: "Tin" }
+   */
+  const splitFullName = (fullName) => {
+    if (!fullName || typeof fullName !== "string") {
+      return { hoDem: "", ten: "" };
+    }
+
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
+      return { hoDem: "", ten: "" };
+    }
+
+    const nameParts = trimmedName.split(/\s+/).filter(Boolean);
+    
+    if (nameParts.length === 0) {
+      return { hoDem: "", ten: "" };
+    }
+    
+    if (nameParts.length === 1) {
+      // Nếu chỉ có 1 từ, coi đó là tên
+      return { hoDem: "", ten: nameParts[0] };
+    }
+
+    // Nếu có nhiều hơn 1 từ: tất cả trừ từ cuối là họ đệm, từ cuối là tên
+    const ten = nameParts[nameParts.length - 1];
+    const hoDem = nameParts.slice(0, -1).join(" ");
+
+    return { hoDem, ten };
+  };
+
   const handleSave = (data) => {
     if (!studentData) return;
 
@@ -206,10 +271,13 @@ export default function EditStudentPage() {
       });
     }
 
+    // Tách tên đầy đủ thành họ đệm và tên
+    const { hoDem, ten } = splitFullName(data.fullName || "");
+
     const payload = {
       ma_csdt: studentData.ma_csdt || "48012",
-      ho_dem_nlx: "",
-      ten_nlx: data.fullName || "",
+      ho_dem_nlx: hoDem,
+      ten_nlx: ten,
       ma_quoc_tich: data.nationality || "",
       ngay_sinh: formatDateToYYYYMMDD(data.dateOfBirth),
       so_cmt: data.idCard || "",

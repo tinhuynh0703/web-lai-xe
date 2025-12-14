@@ -1,11 +1,13 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import * as yup from "yup";
 import { Lock, User } from "lucide-react";
 import { Button } from "../components/ui";
 import { Input, Form } from "../components/forms";
 import { ROUTES } from "../constants";
+import { useAuth } from "../providers/AuthProvider";
 import logoImage from "../assets/logo/logo_sonhung.png";
 
 const loginSchema = yup.object({
@@ -21,7 +23,10 @@ const loginSchema = yup.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, isLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Phải gọi useForm() trước mọi điều kiện return để tuân thủ Rules of Hooks
   const methods = useForm({
     resolver: yupResolver(loginSchema),
     mode: "onSubmit",
@@ -34,16 +39,40 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data) => {
-    // Tạm thời không cần xử lý API, nhập gì cũng đăng nhập được
-    console.log("Login attempt:", data);
+  // Nếu đã đăng nhập, redirect về trang chủ
+  useEffect(() => {
+    if (!isLoading && isAuthenticated()) {
+      navigate(ROUTES.HOME, { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
-    // Lưu thông tin đăng nhập vào localStorage (tạm thời)
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("username", data.username);
+  // Hiển thị loading khi đang kiểm tra authentication
+  if (isLoading) {
+    return null;
+  }
 
-    // Redirect về trang chủ
-    navigate(ROUTES.HOME);
+  // Nếu đã đăng nhập, không hiển thị form (sẽ redirect)
+  if (isAuthenticated()) {
+    return null;
+  }
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      // Gọi API đăng nhập
+      const result = await login({
+        user_name: data.username,
+        password: data.password,
+      });
+
+      // Nếu đăng nhập thành công, navigate sẽ được xử lý trong login function
+      if (!result.success) {
+        // Lỗi đã được hiển thị trong login function
+        console.error("Login failed:", result.error);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onError = (errors) => {
@@ -54,7 +83,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo và Title */}
         <div className="text-center mb-8">
@@ -128,7 +157,13 @@ export default function LoginPage() {
               </a>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full">
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
               Đăng nhập
             </Button>
           </Form>
@@ -144,6 +179,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-
-

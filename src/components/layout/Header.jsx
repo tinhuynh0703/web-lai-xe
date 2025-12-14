@@ -1,13 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 import { ROUTES } from "../../constants";
 import { Button } from "../ui";
+import { useAuth } from "../../providers/AuthProvider";
 import logoImage from "../../assets/logo/logo_sonhung.png";
 
 export function Header() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const isActive = (path) => {
     if (path === ROUTES.HOME) {
@@ -56,6 +58,26 @@ export function Header() {
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-4">
             {renderLinks(() => setIsMenuOpen(false))}
+            {/* User info and logout */}
+            <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200">
+              {user && (
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">
+                    {user.user_name || user.username || "User"}
+                  </span>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={logout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Đăng xuất
+              </Button>
+            </div>
           </nav>
 
           {/* Mobile hamburger */}
@@ -78,6 +100,29 @@ export function Header() {
           <div className="md:hidden pb-3 border-t border-gray-200">
             <div className="flex flex-col gap-2 pt-3">
               {renderLinks(() => setIsMenuOpen(false))}
+              {/* User info and logout for mobile */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-gray-200 mt-2">
+                {user && (
+                  <div className="flex items-center gap-2 text-sm text-gray-700 px-3 py-2">
+                    <User className="w-4 h-4" />
+                    <span className="font-medium">
+                      {user.user_name || user.username || "User"}
+                    </span>
+                  </div>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 mx-3"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Đăng xuất
+                </Button>
+              </div>
             </div>
           </div>
         )}

@@ -1,7 +1,3 @@
-/**
- * API Client configuration
- * Base URL và các cấu hình chung cho API calls
- */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
@@ -113,11 +109,11 @@ async function apiClient(endpoint, options = {}) {
     if (!processedResponse.ok) {
       // Xử lý 401 Unauthorized - token hết hạn
       if (processedResponse.status === 401) {
-        // Xóa token cũ
         localStorage.removeItem('token')
-        // Có thể redirect đến trang login
+        localStorage.removeItem('user')
+
         if (window.location.pathname !== '/login') {
-          // window.location.href = '/login'
+          window.location.href = '/login'
         }
         throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
       }

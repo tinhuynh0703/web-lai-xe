@@ -1,7 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ROUTES } from "./constants";
 import { Layout } from "./components/layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import AddCoursePage from "./pages/AddCoursePage";
 import AddStudentPage from "./pages/AddStudentPage";
@@ -16,14 +17,17 @@ function App() {
         <Route
           path="/*"
           element={
-            <Layout>
-              <Routes>
-                <Route index element={<HomePage />} />
-                <Route path="khoa-hoc/them" element={<AddCoursePage />} />
-                <Route path="hoc-vien/them" element={<AddStudentPage />} />
-                <Route path="hoc-vien/chinh-sua/:maDK" element={<EditStudentPage />} />
-              </Routes>
-            </Layout>
+            <ProtectedRoute>
+              <Layout>
+                <Routes>
+                  <Route index element={<HomePage />} />
+                  <Route path="khoa-hoc/them" element={<AddCoursePage />} />
+                  <Route path="hoc-vien/them" element={<AddStudentPage />} />
+                  <Route path="hoc-vien/chinh-sua/:maDK" element={<EditStudentPage />} />
+                  <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+                </Routes>
+              </Layout>
+            </ProtectedRoute>
           }
         />
       </Routes>

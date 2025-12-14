@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { QueryProvider } from "./providers";
+import { QueryProvider, AuthProvider } from "./providers";
 import { setupInterceptors } from "./lib/api";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
@@ -12,7 +12,9 @@ setupInterceptors();
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <QueryProvider>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </QueryProvider>
   </BrowserRouter>
 );

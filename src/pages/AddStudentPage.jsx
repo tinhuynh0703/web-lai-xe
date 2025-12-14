@@ -38,7 +38,6 @@ import {
   useTrainingClasses,
 } from "../hooks";
 import { showSuccess, showError } from "../utils";
-import { ROUTES } from "../constants";
 
 export default function AddStudentPage() {
   const createStudentProfile = useCreateStudentProfile();
@@ -95,40 +94,50 @@ export default function AddStudentPage() {
     },
   });
 
-  const getApplicantDefaultValues = () => ({
-    registrationCode: "",
-    fullName: "",
-    printName: "",
-    dateOfBirth: "",
-    gender: "",
-    nationality: "VNM",
-    idCard: "",
-    idCardIssueDate: "",
-    idCardIssuePlace: "",
-    permanentAddress: "",
-    permanentAddressDetail: "",
-    currentAddress: "",
-    currentAddressDetail: "",
-    notes: "",
-    existingLicenseNumber: "",
-    existingLicenseStatus: "",
-    existingLicenseClass: "",
-    existingLicenseTestDate: "",
-    existingLicenseIssueDate: "",
-    existingLicenseExpiryDate: "",
-    existingLicenseIssuingUnit: "",
-    existingLicenseIssuingCountry: "",
-    profileTypes: {},
-    drivingYears: "",
-    drivingKilometers: "",
-  });
-
   const resetApplicantSection = () => {
-    const currentValues = methods.getValues();
+    // Reset về defaultValues ban đầu
     methods.reset(
       {
-        ...currentValues, 
-        ...getApplicantDefaultValues(),
+        // Chọn khóa học
+        courseId: "",
+        gplxClass: "",
+        minimumAge: "18",
+        openingDate: "",
+        closingDate: "",
+        trainingClass: "",
+        profileReceiveDate: "",
+        totalStudents: "",
+        currentStudents: "",
+
+        // Thông tin hồ sơ
+        registrationCode: "",
+        fullName: "",
+        printName: "",
+        dateOfBirth: "",
+        gender: "",
+        nationality: "VNM",
+        idCard: "",
+        idCardIssueDate: "",
+        idCardIssuePlace: "",
+        permanentAddress: "",
+        permanentAddressDetail: "",
+        currentAddress: "",
+        currentAddressDetail: "",
+        notes: "",
+        // Giấy phép lái xe hiện có
+        existingLicenseNumber: "",
+        existingLicenseStatus: "",
+        existingLicenseClass: "",
+        existingLicenseTestDate: "",
+        existingLicenseIssueDate: "",
+        existingLicenseExpiryDate: "",
+        existingLicenseIssuingUnit: "",
+        existingLicenseIssuingCountry: "",
+
+        profileTypes: {},
+
+        drivingYears: "",
+        drivingKilometers: "",
       },
       {
         keepErrors: false,
@@ -244,6 +253,39 @@ export default function AddStudentPage() {
     );
   };
 
+  /**
+   * Tách tên đầy đủ thành họ đệm và tên
+   * @param {string} fullName - Tên đầy đủ (ví dụ: "Huynh Tri Tin")
+   * @returns {Object} - { hoDem: "Huynh Tri", ten: "Tin" }
+   */
+  const splitFullName = (fullName) => {
+    if (!fullName || typeof fullName !== "string") {
+      return { hoDem: "", ten: "" };
+    }
+
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
+      return { hoDem: "", ten: "" };
+    }
+
+    const nameParts = trimmedName.split(/\s+/).filter(Boolean);
+    
+    if (nameParts.length === 0) {
+      return { hoDem: "", ten: "" };
+    }
+    
+    if (nameParts.length === 1) {
+      // Nếu chỉ có 1 từ, coi đó là tên
+      return { hoDem: "", ten: nameParts[0] };
+    }
+
+    // Nếu có nhiều hơn 1 từ: tất cả trừ từ cuối là họ đệm, từ cuối là tên
+    const ten = nameParts[nameParts.length - 1];
+    const hoDem = nameParts.slice(0, -1).join(" ");
+
+    return { hoDem, ten };
+  };
+
   const onSubmit = (data) => {
     const duplicateStudent = courseStudents.find(
       (s) => s.idCard === data.idCard
@@ -276,10 +318,13 @@ export default function AddStudentPage() {
       });
     }
 
+    // Tách tên đầy đủ thành họ đệm và tên
+    const { hoDem, ten } = splitFullName(data.fullName || "");
+
     const payload = {
       ma_csdt: "48012",
-      ho_dem_nlx: "",
-      ten_nlx: data.fullName || "",
+      ho_dem_nlx: hoDem,
+      ten_nlx: ten,
       ma_quoc_tich: data.nationality || "",
       ngay_sinh: formatDateToYYYYMMDD(data.dateOfBirth),
       so_cmt: data.idCard || "",
@@ -320,7 +365,11 @@ export default function AddStudentPage() {
     });
   };
 
-  const fullName = methods.watch("fullName");
+  // Sử dụng useWatch để đảm bảo component re-render khi fullName thay đổi
+  const fullName = useWatch({
+    control: methods.control,
+    name: "fullName",
+  });
 
   const { data: courses = [], isLoading: isLoadingCourses } =
     useCoursesByDateRange();
@@ -408,9 +457,22 @@ export default function AddStudentPage() {
     }
   }, [courseId, selectedCourse, methods]);
 
+  // Tự động điền "Tên in" khi "Họ và tên" thay đổi
   useEffect(() => {
-    if (fullName !== undefined) {
-      methods.setValue("printName", fullName, { shouldValidate: true });
+    // Chỉ cập nhật khi fullName có giá trị (không phải undefined, null, hoặc empty string)
+    if (fullName) {
+      methods.setValue("printName", fullName, { 
+        shouldValidate: false,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+    } else if (fullName === "") {
+      // Nếu fullName là empty string, cũng clear printName
+      methods.setValue("printName", "", { 
+        shouldValidate: false,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
     }
   }, [fullName, methods]);
 
