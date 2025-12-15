@@ -16,6 +16,7 @@ export const Input = forwardRef(function Input(
     className,
     disabled,
     required,
+    autoUppercase = false,
     ...props
   },
   ref
@@ -58,6 +59,13 @@ export const Input = forwardRef(function Input(
               className
             )}
             {...field}
+            onChange={(e) => {
+              const value = autoUppercase 
+                ? e.target.value.toUpperCase() 
+                : e.target.value;
+              field.onChange(value);
+            }}
+            value={field.value || ""}
             {...props}
             ref={(e) => {
               field.ref(e);

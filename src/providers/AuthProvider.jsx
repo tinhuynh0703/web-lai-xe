@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Kiểm tra xem user đã đăng nhập chưa khi component mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
@@ -28,16 +27,10 @@ export function AuthProvider({ children }) {
     setIsLoading(false);
   }, []);
 
-  /**
-   * Đăng nhập
-   */
   const login = async (credentials) => {
     try {
       const response = await authApi.login(credentials);
-      
-      // Lưu token và thông tin user vào localStorage
-      // Giả sử response có cấu trúc: { token: "...", user: {...} }
-      // Nếu cấu trúc khác, cần điều chỉnh
+   
       const token = response.token || response.data?.token || response.access_token;
       const userData = response.user || response.data?.user || { user_name: credentials.user_name };
 
@@ -52,25 +45,20 @@ export function AuthProvider({ children }) {
         throw new Error("Token không được trả về từ server");
       }
     } catch (error) {
+      console.log(error);
       const errorMessage = error.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.";
       showError(errorMessage);
       return { success: false, error: errorMessage };
     }
   };
 
-  /**
-   * Đăng xuất
-   */
   const logout = async () => {
     try {
-      // Gọi API logout nếu có
       await authApi.logout().catch(() => {
-        // Bỏ qua lỗi nếu endpoint không tồn tại
       });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Xóa token và user data
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       setUser(null);
@@ -78,9 +66,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  /**
-   * Kiểm tra xem user đã đăng nhập chưa
-   */
   const isAuthenticated = () => {
     const token = localStorage.getItem("token");
     return !!token && !!user;
@@ -97,9 +82,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-/**
- * Hook để sử dụng AuthContext
- */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

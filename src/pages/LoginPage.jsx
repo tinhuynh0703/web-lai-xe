@@ -26,32 +26,28 @@ export default function LoginPage() {
   const { login, isAuthenticated, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Phải gọi useForm() trước mọi điều kiện return để tuân thủ Rules of Hooks
   const methods = useForm({
     resolver: yupResolver(loginSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
     shouldFocusError: true,
-    criteriaMode: "all", // Hiển thị tất cả errors
+    criteriaMode: "all", 
     defaultValues: {
       username: "",
       password: "",
     },
   });
 
-  // Nếu đã đăng nhập, redirect về trang chủ
   useEffect(() => {
     if (!isLoading && isAuthenticated()) {
       navigate(ROUTES.HOME, { replace: true });
     }
   }, [isLoading, isAuthenticated, navigate]);
 
-  // Hiển thị loading khi đang kiểm tra authentication
   if (isLoading) {
     return null;
   }
 
-  // Nếu đã đăng nhập, không hiển thị form (sẽ redirect)
   if (isAuthenticated()) {
     return null;
   }
@@ -59,27 +55,18 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      // Gọi API đăng nhập
       const result = await login({
         user_name: data.username,
         password: data.password,
       });
+      console.log(result)
 
-      // Nếu đăng nhập thành công, navigate sẽ được xử lý trong login function
       if (!result.success) {
-        // Lỗi đã được hiển thị trong login function
         console.error("Login failed:", result.error);
       }
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const onError = (errors) => {
-    // Log errors để debug
-    console.log("Validation errors:", errors);
-    // Force update formState để trigger re-render
-    // React Hook Form sẽ tự động update formState.errors khi validation fail
   };
 
   return (
@@ -105,7 +92,6 @@ export default function LoginPage() {
           <Form
             methods={methods}
             onSubmit={onSubmit}
-            onError={onError}
             className="space-y-6"
           >
             <div>

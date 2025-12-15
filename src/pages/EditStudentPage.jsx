@@ -367,6 +367,7 @@ export default function EditStudentPage() {
                 name="fullName"
                 label="Họ và tên"
                 required
+                autoUppercase
               />
               <Input
                 name="printName"

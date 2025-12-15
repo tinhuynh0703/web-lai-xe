@@ -667,7 +667,7 @@ export default function AddStudentPage() {
                 <Input name="registrationCode" label="Mã đăng ký" disabled />
                 {/* <Input name="profileNumber" label="Số Hồ sơ" /> */}
                 {/* </div> */}
-                <Input name="fullName" label="Họ và tên" required />
+                <Input name="fullName" label="Họ và tên" required autoUppercase />
                 <Input name="printName" label="Tên in" disabled />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <DatePicker
