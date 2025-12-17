@@ -25,3 +25,4 @@ export const authApi = {
   logout: () => api.post("/UserTkn/logout"),
 };
 
+

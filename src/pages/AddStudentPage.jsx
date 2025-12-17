@@ -1,6 +1,6 @@
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Camera,
@@ -45,6 +45,8 @@ export default function AddStudentPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
+  const [portraitFile, setPortraitFile] = useState(null);
+  const portraitInputRef = useRef(null);
 
   const methods = useForm({
     resolver: yupResolver(studentEnrollmentSchema),
@@ -343,7 +345,6 @@ export default function AddStudentPage() {
       noi_ct_ma_dvhc:
         currentAddressUnit?.ma_dvhc || "",
       noi_ct_ma_dvql: currentAddressUnit?.ma_dvql || "",
-      duong_dan_anh: "",
       so_nam_lx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
       so_km_lxan_toan: data.drivingKilometers
         ? parseInt(data.drivingKilometers) || 0
@@ -358,6 +359,11 @@ export default function AddStudentPage() {
       don_vi_cap_gplxda_co: data.existingLicenseIssuingUnit || "",
       noi_cap_gplxda_co: data.existingLicenseIssuingCountry || "VNM",
     };
+
+    // Thêm file ảnh chân dung nếu có
+    if (portraitFile) {
+      payload.file = portraitFile;
+    }
 
 
     createStudentProfile.mutate(payload, {
@@ -554,11 +560,6 @@ export default function AddStudentPage() {
         accessorKey: "gender", 
         header: "Giới tính",
         enableSorting: true,
-      },
-      { 
-        accessorKey: "nationality", 
-        header: "Quốc tịch",
-        enableSorting: false,
       },
       { 
         accessorKey: "idCard", 
@@ -778,19 +779,43 @@ export default function AddStudentPage() {
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Ảnh chân dung (3x4)
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-white">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-white">
                     <div className="flex flex-col items-center gap-3">
-                      <FileImage className="w-12 h-12 text-gray-400" />
-                      <div className="flex gap-2">
-                        <Button type="button" variant="outline" size="sm">
-                          <Camera className="w-4 h-4 mr-1" />
-                          Chụp ảnh
-                        </Button>
-                        <Button type="button" variant="outline" size="sm">
-                          <FolderOpen className="w-4 h-4 mr-1" />
-                          Chọn tệp...
-                        </Button>
+                      <div className="w-24 h-32 bg-gray-100 border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                        {portraitFile ? (
+                          <img
+                            src={URL.createObjectURL(portraitFile)}
+                            alt="Ảnh chân dung xem trước"
+                            className="w-full h-full object-cover rounded"
+                          />
+                        ) : (
+                          <FileImage className="w-8 h-8 text-gray-400" />
+                        )}
                       </div>
+                      <input
+                        ref={portraitInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setPortraitFile(file);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => portraitInputRef.current?.click()}
+                      >
+                        <FolderOpen className="w-4 h-4 mr-1" />
+                        Chọn tệp...
+                      </Button>
+                      {portraitFile && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          Đã chọn: {portraitFile.name}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
