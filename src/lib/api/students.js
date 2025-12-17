@@ -22,4 +22,11 @@ export const studentsApi = {
   // Lấy thông tin chi tiết học viên theo mã đăng ký
   getStudentDetail: (maDK) =>
     api.get(`/NguoiLxes/thong-tin-nguoi-lai-xe/${maDK}`),
+
+  // Upload ảnh thẻ cho học viên
+  uploadCardImage: (maDk, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post(`/NguoiLxes/upload-hinh-the/${maDk}`, formData);
+  },
 };

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { studentsApi } from "../lib/api";
+import { showSuccess, showError } from "../utils";
 
 /**
  * Hook để tạo thông tin học viên (API /NguoiLxes)
@@ -104,6 +105,31 @@ export function useDeleteStudent() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+  });
+}
+
+/**
+ * Hook để upload ảnh thẻ cho học viên
+ */
+export function useUploadStudentImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ maDk, file, ma_khoa_hoc }) =>
+      studentsApi.uploadCardImage(maDk, file),
+    onSuccess: (_, variables) => {
+      showSuccess("Tải ảnh thẻ thành công!");
+      if (variables?.ma_khoa_hoc) {
+        queryClient.invalidateQueries({
+          queryKey: ["students", "byCourse", variables.ma_khoa_hoc],
+        });
+      }
+    },
+    onError: (error) => {
+      showError(
+        error?.message || "Tải ảnh thẻ không thành công. Vui lòng thử lại."
+      );
     },
   });
 }

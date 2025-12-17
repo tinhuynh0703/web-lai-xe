@@ -36,11 +36,59 @@ import {
   useCreateStudentProfile,
   useStudentsByCourse,
   useTrainingClasses,
+  useUploadStudentImage,
 } from "../hooks";
+
+function UploadImageAction({ maDk, courseId, uploadStudentImage }) {
+  const inputRef = useRef(null);
+
+  const handleFileChange = (event) => {
+    event.stopPropagation();
+    const file = event.target.files?.[0];
+    if (!file || !maDk) return;
+
+    uploadStudentImage.mutate({
+      maDk,
+      file,
+      ma_khoa_hoc: courseId,
+    });
+  };
+
+  const handleButtonClick = (event) => {
+    event.stopPropagation();
+    inputRef.current?.click();
+  };
+
+  if (!maDk) return null;
+
+  return (
+    <div
+      className="flex items-center justify-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={handleButtonClick}
+      >
+        Tải ảnh thẻ
+      </Button>
+    </div>
+  );
+}
 import { showSuccess, showError } from "../utils";
 
 export default function AddStudentPage() {
   const createStudentProfile = useCreateStudentProfile();
+  const uploadStudentImage = useUploadStudentImage();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -540,7 +588,7 @@ export default function AddStudentPage() {
   );
 
   const studentColumns = useMemo(
-    () => [
+  () => [
       {
         header: "STT",
         cell: ({ row }) => row.index + 1,
@@ -586,8 +634,23 @@ export default function AddStudentPage() {
         header: "Ngày nhận HS",
         enableSorting: true,
       },
+      {
+        header: "Hành động",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const original = row.original;
+          const maDk = original?.maDK;
+          return (
+            <UploadImageAction
+              maDk={maDk}
+              courseId={courseId}
+              uploadStudentImage={uploadStudentImage}
+            />
+          );
+        },
+      },
     ],
-    []
+    [uploadStudentImage, courseId]
   );
 
 
