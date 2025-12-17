@@ -1,12 +1,16 @@
 import { api } from "./client";
+import { objectToFormData } from "../utils";
 
 /**
  * API endpoints cho quản lý học viên
  */
 
 export const studentsApi = {
-  // Tạo thông tin học viên
-  createStudent: (data) => api.post("/NguoiLxes", data),
+  // Tạo thông tin học viên (multipart/form-data)
+  createStudent: (data) => {
+    const formData = objectToFormData(data);
+    return api.post("/NguoiLxes", formData);
+  },
 
   // Cập nhật thông tin học viên (cùng endpoint với create)
   updateStudent: (data) => api.put("/NguoiLxes", data),

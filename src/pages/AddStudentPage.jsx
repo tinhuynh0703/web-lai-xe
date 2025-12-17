@@ -85,7 +85,7 @@ export default function AddStudentPage() {
       existingLicenseIssueDate: "",
       existingLicenseExpiryDate: "",
       existingLicenseIssuingUnit: "",
-      existingLicenseIssuingCountry: "",
+      existingLicenseIssuingCountry: "VNM",
 
       profileTypes: {},
 
@@ -132,7 +132,7 @@ export default function AddStudentPage() {
         existingLicenseIssueDate: "",
         existingLicenseExpiryDate: "",
         existingLicenseIssuingUnit: "",
-        existingLicenseIssuingCountry: "",
+        existingLicenseIssuingCountry: "VNM",
 
         profileTypes: {},
 
@@ -349,6 +349,14 @@ export default function AddStudentPage() {
         ? parseInt(data.drivingKilometers) || 0
         : 0,
       giay_tos: giayTos,
+      // Giấy phép lái xe đã có
+      so_gplxda_co: data.existingLicenseNumber || "",
+      hang_gplxda_co: data.existingLicenseClass || "",
+      ngay_ttgplxda_co: convertDateToISO(data.existingLicenseTestDate) || "",
+      ngay_cap_gplxda_co: convertDateToISO(data.existingLicenseIssueDate) || "",
+      ngay_hhgplxda_co: convertDateToISO(data.existingLicenseExpiryDate) || "",
+      don_vi_cap_gplxda_co: data.existingLicenseIssuingUnit || "",
+      noi_cap_gplxda_co: data.existingLicenseIssuingCountry || "VNM",
     };
 
 
@@ -594,7 +602,7 @@ export default function AddStudentPage() {
       <div className="container mx-auto px-4 sm:px-6 py-4">
         <Form methods={methods} onSubmit={onSubmit} className="space-y-6">
           {/* Section 1: Chọn khóa học */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Chọn khóa học
             </h2>
@@ -656,7 +664,7 @@ export default function AddStudentPage() {
           </div>
 
           {/* Section 2: Thông tin Hồ sơ */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Thông tin Hồ sơ
             </h2>
@@ -955,7 +963,7 @@ export default function AddStudentPage() {
           </div>
 
           {/* Section 3: Danh sách học viên */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
                 Danh sách học viên của khóa {selectedCourse?.ma_kh || ""}

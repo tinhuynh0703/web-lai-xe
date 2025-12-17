@@ -68,16 +68,17 @@ async function applyErrorInterceptors(error) {
   throw error
 }
 
-/**
- * Custom fetch wrapper với interceptor support và timeout
- */
 async function apiClient(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
   
-  // Base config
+  const defaultHeaders = {}
+  if (!options.headers || !('Content-Type' in options.headers)) {
+    defaultHeaders['Content-Type'] = 'application/json'
+  }
+  
   let config = {
     headers: {
-      'Content-Type': 'application/json',
+      ...defaultHeaders,
       ...options.headers,
     },
     ...options,
@@ -175,12 +176,22 @@ export const api = {
     const queryString = params ? '?' + new URLSearchParams(params).toString() : ''
     return apiClient(endpoint + queryString, { ...options, method: 'GET' })
   },
-  post: (endpoint, data, options) =>
-    apiClient(endpoint, {
+  post: (endpoint, data, options) => {
+    // Check if data is FormData
+    const isFormData = data instanceof FormData
+    const body = isFormData ? data : JSON.stringify(data)
+
+    const headers = isFormData 
+      ? { ...options?.headers }
+      : { 'Content-Type': 'application/json', ...options?.headers }
+    
+    return apiClient(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(data),
-    }),
+      body,
+      headers,
+    })
+  },
   put: (endpoint, data, options) =>
     apiClient(endpoint, {
       ...options,

@@ -1,10 +1,4 @@
-/**
- * Utility function to merge Tailwind CSS classes
- * @param {...string} inputs - Class names to merge
- * @returns {string} Merged class names
- */
 export function cn(...inputs) {
-  // Simple class merging without external dependency
   return inputs
     .filter(Boolean)
     .map((input) => {
@@ -19,4 +13,41 @@ export function cn(...inputs) {
     })
     .join(' ')
     .trim()
+}
+
+export function objectToFormData(data) {
+  const formData = new FormData()
+  
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      return
+    }
+    
+    if (value instanceof File) {
+      formData.append(key, value)
+      return
+    }
+    
+    if (Array.isArray(value)) {
+      if (value.length > 0 && typeof value[0] === 'object') {
+        formData.append(key, JSON.stringify(value))
+      } else {
+        value.forEach((item, index) => {
+          if (item !== null && item !== undefined) {
+            formData.append(`${key}[${index}]`, String(item))
+          }
+        })
+      }
+      return
+    }
+    
+    if (typeof value === 'object') {
+      formData.append(key, JSON.stringify(value))
+      return
+    }
+    
+    formData.append(key, String(value))
+  })
+  
+  return formData
 }

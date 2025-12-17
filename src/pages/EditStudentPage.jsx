@@ -131,6 +131,14 @@ export default function EditStudentPage() {
     setValue("notes", studentData.ghi_chu || "", { shouldValidate: false, shouldDirty: false });
     setValue("drivingYears", studentData.so_nam_lx?.toString() || "", { shouldValidate: false, shouldDirty: false });
     setValue("drivingKilometers", studentData.so_km_lxan_toan?.toString() || "", { shouldValidate: false, shouldDirty: false });
+    // Giấy phép lái xe đã có
+    setValue("existingLicenseNumber", studentData.so_gplxda_co || "", { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseClass", studentData.hang_gplxda_co || "", { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseTestDate", formatISOToDateInput(studentData.ngay_ttgplxda_co), { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseIssueDate", formatISOToDateInput(studentData.ngay_cap_gplxda_co), { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseExpiryDate", formatISOToDateInput(studentData.ngay_hhgplxda_co), { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseIssuingUnit", studentData.don_vi_cap_gplxda_co || "", { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseIssuingCountry", studentData.noi_cap_gplxda_co || "VNM", { shouldValidate: false, shouldDirty: false });
   }, [studentData, studentMethods.setValue]);
 
   // Update profileTypes riêng khi cả studentData và profileTypes đều có
@@ -304,6 +312,14 @@ export default function EditStudentPage() {
       giay_tos: giayTos,
       ma_dk: studentData.ma_dk || maDK || "",
       ma_loai_hs: studentData.ma_loai_hs || 0,
+      // Giấy phép lái xe đã có
+      so_gplxda_co: data.existingLicenseNumber || "",
+      hang_gplxda_co: data.existingLicenseClass || "",
+      ngay_ttgplxda_co: convertDateToISO(data.existingLicenseTestDate) || "",
+      ngay_cap_gplxda_co: convertDateToISO(data.existingLicenseIssueDate) || "",
+      ngay_hhgplxda_co: convertDateToISO(data.existingLicenseExpiryDate) || "",
+      don_vi_cap_gplxda_co: data.existingLicenseIssuingUnit || "",
+      noi_cap_gplxda_co: data.existingLicenseIssuingCountry || "VNM",
     };
 
     updateStudentProfile.mutate(payload, {
