@@ -70,15 +70,6 @@ export default function AddCoursePage() {
     }
   }, [selectedTrainingClass, methods]);
 
-  const convertToISODate = (dateString) => {
-    if (!dateString || dateString.trim() === "") {
-      return null;
-    }
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-    return date.toISOString();
-  };
-
   // Hàm chuyển đổi ngày thành ISO string chỉ có phần ngày (không có giờ)
   // Dùng cho các trường ngày như ngày KG, ngày BG, ngày nhận HS, v.v.
   const convertToISODateOnly = (dateString) => {

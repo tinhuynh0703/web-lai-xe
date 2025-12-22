@@ -6,7 +6,7 @@ import { api } from "./client";
 
 export const danhMucsApi = {
   // Lấy danh sách mã hạng đào tạo (trả về mảng string)
-  getTrainingClassCodes: () => api.get("/DanhMucs/ma-hang-gplx"),
+  getTrainingClassCodes: () => api.get("/DanhMucs/ma-hang-dao-tao"),
 
   // Lấy danh sách loại hình đào tạo dựa trên mã hạng đào tạo
   getTrainingTypes: (maGplx) =>
