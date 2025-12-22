@@ -283,43 +283,43 @@ export default function EditStudentPage() {
     const { hoDem, ten } = splitFullName(data.fullName || "");
 
     const payload = {
-      ma_csdt: studentData.ma_csdt || "48012",
-      ho_dem_nlx: hoDem,
-      ten_nlx: ten,
-      ma_quoc_tich: data.nationality || "",
-      ngay_sinh: formatDateToYYYYMMDD(data.dateOfBirth),
-      so_cmt: data.idCard || "",
-      ngay_cap_cmt: convertDateToISO(data.idCardIssueDate),
-      noi_cap_cmt: data.idCardIssuePlace || "",
-      ghi_chu: data.notes || "",
-      gioi_tinh: data.gender || "",
-      so_cmnd_cu: "",
-      hang_gplx: studentData.hang_gplx || "",
-      hang_dao_tao: studentData.hang_dao_tao || "",
-      ma_khoa_hoc: studentData.ma_khoa_hoc || "",
-      nam_hoc_lx: 0,
-      noi_tt_ma_dvhc:
+      MaCsdt: studentData.ma_csdt || "48012",
+      HoDemNlx: hoDem,
+      TenNlx: ten,
+      MaQuocTich: data.nationality || "",
+      NgaySinh: formatDateToYYYYMMDD(data.dateOfBirth),
+      SoCmt: data.idCard || "",
+      NgayCapCmt: convertDateToISO(data.idCardIssueDate),
+      NoiCapCmt: data.idCardIssuePlace || "",
+      GhiChu: data.notes || "",
+      GioiTinh: data.gender || "",
+      SoCmndCu: "",
+      HangGplx: studentData.hang_gplx || "",
+      HangDaoTao: studentData.hang_dao_tao || "",
+      MaKhoaHoc: studentData.ma_khoa_hoc || "",
+      NamHocLx: 0,
+      NoiTtMaDvhc:
         permanentAddressUnit?.ma_dvhc || "",
-      noi_tt_ma_dvql: permanentAddressUnit?.ma_dvql || "",
-      noi_ct_ma_dvhc:
+      NoiTtMaDvql: permanentAddressUnit?.ma_dvql || "",
+      NoiCtMaDvhc:
         currentAddressUnit?.ma_dvhc || "",
-      noi_ct_ma_dvql: currentAddressUnit?.ma_dvql || "",
-      duong_dan_anh: studentData.duong_dan_anh || "",
-      so_nam_lx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
-      so_km_lxan_toan: data.drivingKilometers
+      NoiCtMaDvql: currentAddressUnit?.ma_dvql || "",
+      DuongDanAnh: studentData.duong_dan_anh || "",
+      SoNamLx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
+      SoKmLxanToan: data.drivingKilometers
         ? parseInt(data.drivingKilometers) || 0
         : 0,
-      giay_tos: giayTos,
-      ma_dk: studentData.ma_dk || maDK || "",
-      ma_loai_hs: studentData.ma_loai_hs || 0,
+      GiayTos: giayTos,
+      MaDk: studentData.ma_dk || maDK || "",
+      MaLoaiHs: studentData.ma_loai_hs || 0,
       // Giấy phép lái xe đã có
-      so_gplxda_co: data.existingLicenseNumber || "",
-      hang_gplxda_co: data.existingLicenseClass || "",
-      ngay_ttgplxda_co: convertDateToISO(data.existingLicenseTestDate) || "",
-      ngay_cap_gplxda_co: convertDateToISO(data.existingLicenseIssueDate) || "",
-      ngay_hhgplxda_co: convertDateToISO(data.existingLicenseExpiryDate) || "",
-      don_vi_cap_gplxda_co: data.existingLicenseIssuingUnit || "",
-      noi_cap_gplxda_co: data.existingLicenseIssuingCountry || "VNM",
+      SoGplxDaCo: data.existingLicenseNumber || "",
+      HangGplxDaCo: data.existingLicenseClass || "",
+      NgayTtgplxDaCo: convertDateToISO(data.existingLicenseTestDate) || "",
+      NgayCapGplxDaCo: convertDateToISO(data.existingLicenseIssueDate) || "",
+      NgayHhgplxDaCo: convertDateToISO(data.existingLicenseExpiryDate) || "",
+      DonViCapGplxDaCo: data.existingLicenseIssuingUnit || "",
+      NoiCapGplxDaCo: data.existingLicenseIssuingCountry || "VNM",
     };
 
     updateStudentProfile.mutate(payload, {

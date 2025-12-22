@@ -197,6 +197,65 @@ export default function AddStudentPage() {
     );
   };
 
+  const resetStudentProfileSection = () => {
+    // Chỉ reset phần thông tin hồ sơ, giữ nguyên form chọn khóa học
+    const currentValues = methods.getValues();
+    methods.reset(
+      {
+        // Giữ nguyên các trường chọn khóa học
+        courseId: currentValues.courseId || "",
+        gplxClass: currentValues.gplxClass || "",
+        minimumAge: currentValues.minimumAge || "18",
+        openingDate: currentValues.openingDate || "",
+        closingDate: currentValues.closingDate || "",
+        trainingClass: currentValues.trainingClass || "",
+        profileReceiveDate: currentValues.profileReceiveDate || "",
+        totalStudents: currentValues.totalStudents || "",
+        currentStudents: currentValues.currentStudents || "",
+
+        // Reset thông tin hồ sơ
+        registrationCode: "",
+        fullName: "",
+        printName: "",
+        dateOfBirth: "",
+        gender: "",
+        nationality: "VNM",
+        idCard: "",
+        idCardIssueDate: "",
+        idCardIssuePlace: "",
+        permanentAddress: "",
+        permanentAddressDetail: "",
+        currentAddress: "",
+        currentAddressDetail: "",
+        notes: "",
+        // Giấy phép lái xe hiện có
+        existingLicenseNumber: "",
+        existingLicenseStatus: "",
+        existingLicenseClass: "",
+        existingLicenseTestDate: "",
+        existingLicenseIssueDate: "",
+        existingLicenseExpiryDate: "",
+        existingLicenseIssuingUnit: "",
+        existingLicenseIssuingCountry: "VNM",
+
+        profileTypes: {},
+
+        drivingYears: "",
+        drivingKilometers: "",
+      },
+      {
+        keepErrors: false,
+        keepDirty: false,
+        keepTouched: false,
+      }
+    );
+    // Reset ảnh chân dung
+    setPortraitFile(null);
+    if (portraitInputRef.current) {
+      portraitInputRef.current.value = "";
+    }
+  };
+
   const courseId = methods.watch("courseId");
 
   const { data: studentsData = [], isLoading: isLoadingStudents } =
@@ -276,6 +335,26 @@ export default function AddStudentPage() {
 
     if (isNaN(isoString.getTime())) return null;
     return isoString.toISOString();
+  };
+
+  // Hàm chuyển đổi ngày thành ISO string chỉ có phần ngày (không có giờ)
+  // Dùng cho các trường ngày như ngày KG, ngày BG, ngày nhận HS, v.v.
+  const convertDateToISODateOnly = (dateString) => {
+    if (!dateString) return null;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      // Lấy phần ngày và set giờ về 00:00:00.000Z
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      
+      return new Date(`${year}-${month}-${day}T00:00:00.000Z`).toISOString();
+    } catch (error) {
+      return null;
+    }
   };
 
   const formatDateToYYYYMMDD = (dateString) => {
@@ -372,40 +451,40 @@ export default function AddStudentPage() {
     const { hoDem, ten } = splitFullName(data.fullName || "");
 
     const payload = {
-      ma_csdt: "48012",
-      ho_dem_nlx: hoDem,
-      ten_nlx: ten,
-      ma_quoc_tich: data.nationality || "",
-      ngay_sinh: formatDateToYYYYMMDD(data.dateOfBirth),
-      so_cmt: data.idCard || "",
-      ngay_cap_cmt: convertDateToISO(data.idCardIssueDate),
-      noi_cap_cmt: data.idCardIssuePlace || "",
-      ghi_chu: data.notes || "",
-      gioi_tinh: data.gender || "",
-      so_cmnd_cu: "",
-      hang_gplx: data.gplxClass || "",
-      hang_dao_tao: data.trainingClass || "",
-      ma_khoa_hoc: data.courseId || "",
-      nam_hoc_lx: 0,
-      noi_tt_ma_dvhc:
+      MaCsdt: "48012",
+      HoDemNlx: hoDem,
+      TenNlx: ten,
+      MaQuocTich: data.nationality || "",
+      NgaySinh: formatDateToYYYYMMDD(data.dateOfBirth),
+      SoCmt: data.idCard || "",
+      NgayCapCmt: convertDateToISODateOnly(data.idCardIssueDate),
+      NoiCapCmt: data.idCardIssuePlace || "",
+      GhiChu: data.notes || "",
+      GioiTinh: data.gender || "",
+      SoCmndCu: "",
+      HangGplx: data.gplxClass || "",
+      HangDaoTao: data.trainingClass || "",
+      MaKhoaHoc: data.courseId || "",
+      NamHocLx: 0,
+      NoiTtMaDvhc:
         permanentAddressUnit?.ma_dvhc || "",
-      noi_tt_ma_dvql: permanentAddressUnit?.ma_dvql || "",
-      noi_ct_ma_dvhc:
+      NoiTtMaDvql: permanentAddressUnit?.ma_dvql || "",
+      NoiCtMaDvhc:
         currentAddressUnit?.ma_dvhc || "",
-      noi_ct_ma_dvql: currentAddressUnit?.ma_dvql || "",
-      so_nam_lx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
-      so_km_lxan_toan: data.drivingKilometers
+      NoiCtMaDvql: currentAddressUnit?.ma_dvql || "",
+      SoNamLx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
+      SoKmLxanToan: data.drivingKilometers
         ? parseInt(data.drivingKilometers) || 0
         : 0,
-      giay_tos: giayTos,
+      GiayTos: giayTos,
       // Giấy phép lái xe đã có
-      so_gplxda_co: data.existingLicenseNumber || "",
-      hang_gplxda_co: data.existingLicenseClass || "",
-      ngay_ttgplxda_co: convertDateToISO(data.existingLicenseTestDate) || "",
-      ngay_cap_gplxda_co: convertDateToISO(data.existingLicenseIssueDate) || "",
-      ngay_hhgplxda_co: convertDateToISO(data.existingLicenseExpiryDate) || "",
-      don_vi_cap_gplxda_co: data.existingLicenseIssuingUnit || "",
-      noi_cap_gplxda_co: data.existingLicenseIssuingCountry || "VNM",
+      SoGplxdaCo: data.existingLicenseNumber || "",
+      HangGplxdaCo: data.existingLicenseClass || "",
+      NgayTtgplxdaCo: convertDateToISODateOnly(data.existingLicenseTestDate) || "",
+      NgayCapGplxdaCo: convertDateToISODateOnly(data.existingLicenseIssueDate) || "",
+      NgayHhgplxdaCo: convertDateToISODateOnly(data.existingLicenseExpiryDate) || "",
+      DonViCapGplxdaCo: data.existingLicenseIssuingUnit || "",
+      NoiCapGplxdaCo: data.existingLicenseIssuingCountry || "VNM",
     };
 
     // Thêm file ảnh chân dung nếu có
@@ -417,7 +496,7 @@ export default function AddStudentPage() {
     createStudentProfile.mutate(payload, {
       onSuccess: () => {
         showSuccess("Thêm học viên thành công!");
-        resetApplicantSection();
+        resetStudentProfileSection();
       },
       onError: (error) => {
         showError(
@@ -498,6 +577,17 @@ export default function AddStudentPage() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
+  // Hàm format ngày thành YYYY-MM-DD (chỉ ngày, không có giờ) cho input type="date"
+  const formatToDateLocal = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     if (selectedCourse && courseId) {
       methods.setValue("gplxClass", selectedCourse.hang_gplx || "");
@@ -505,15 +595,15 @@ export default function AddStudentPage() {
       methods.setValue("totalStudents", selectedCourse.tong_so_hv || "");
       methods.setValue(
         "openingDate",
-        formatToDateTimeLocal(selectedCourse.ngay_kg)
+        formatToDateLocal(selectedCourse.ngay_kg)
       );
       methods.setValue(
         "closingDate",
-        formatToDateTimeLocal(selectedCourse.ngay_bg)
+        formatToDateLocal(selectedCourse.ngay_bg)
       );
       methods.setValue(
         "profileReceiveDate",
-        formatToDateTimeLocal(selectedCourse.ngay_nhan_hs)
+        formatToDateLocal(selectedCourse.ngay_nhan_hs)
       );
       methods.setValue("minimumAge", selectedCourse.tuoi_toi_thieu || "18");
     }
@@ -699,8 +789,8 @@ export default function AddStudentPage() {
                 type="number"
                 disabled
               />
-              <DatePicker name="openingDate" label="Ngày KG" disabled />
-              <DatePicker name="closingDate" label="Ngày BG" disabled />
+              <DatePicker name="openingDate" label="Ngày KG" type="date" disabled />
+              <DatePicker name="closingDate" label="Ngày BG" type="date" disabled />
               <Input
                 name="trainingClass"
                 label="Hạng ĐT"
@@ -710,6 +800,7 @@ export default function AddStudentPage() {
               <DatePicker
                 name="profileReceiveDate"
                 label="Ngày nhận HS"
+                type="date"
                 disabled
               />
               <Input

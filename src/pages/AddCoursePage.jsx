@@ -79,6 +79,28 @@ export default function AddCoursePage() {
     return date.toISOString();
   };
 
+  // Hàm chuyển đổi ngày thành ISO string chỉ có phần ngày (không có giờ)
+  // Dùng cho các trường ngày như ngày KG, ngày BG, ngày nhận HS, v.v.
+  const convertToISODateOnly = (dateString) => {
+    if (!dateString || dateString.trim() === "") {
+      return null;
+    }
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      // Lấy phần ngày và set giờ về 00:00:00.000Z
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      
+      return new Date(`${year}-${month}-${day}T00:00:00.000Z`).toISOString();
+    } catch (error) {
+      return null;
+    }
+  };
+
   const convertToNumber = (value) => {
     if (!value || value === "") {
       return 0;
@@ -98,13 +120,13 @@ export default function AddCoursePage() {
           : null,
       hang_dt: data.trainingClass || "",
       so_qd_khai_giang: data.decisionNumberKG || "",
-      ngay_qd_khai_giang: convertToISODate(data.decisionDateKG),
-      ngay_kg: convertToISODate(data.openingDate),
-      ngay_bg: convertToISODate(data.closingDate),
+      ngay_qd_khai_giang: convertToISODateOnly(data.decisionDateKG),
+      ngay_kg: convertToISODateOnly(data.openingDate),
+      ngay_bg: convertToISODateOnly(data.closingDate),
       muc_tieu_dt: data.trainingObjectives || "",
       tong_so_hv: convertToNumber(data.totalStudents),
-      ngay_thi: convertToISODate(data.examDate),
-      ngay_sh: convertToISODate(data.assessmentDate),
+      ngay_thi: convertToISODateOnly(data.examDate),
+      ngay_sh: convertToISODateOnly(data.assessmentDate),
       ghi_chu: data.notes || "",
     };
 
@@ -222,7 +244,8 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="decisionDateKG"
                     label="Ngày quyết định KG"
-                    placeholder="Chọn ngày và giờ"
+                    placeholder="mm/dd/yyyy"
+                    type="date"
                   />
                 </div>
               </div>
@@ -232,7 +255,8 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="openingDate"
                     label="Ngày khai giảng"
-                    placeholder="Chọn ngày và giờ"
+                    placeholder="mm/dd/yyyy"
+                    type="date"
                     required
                   />
                 </div>
@@ -240,7 +264,8 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="closingDate"
                     label="Ngày bế giảng"
-                    placeholder="Chọn ngày và giờ"
+                    placeholder="mm/dd/yyyy"
+                    type="date"
                     required
                   />
                 </div>
@@ -251,14 +276,16 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="examDate"
                     label="Ngày thi"
-                    placeholder="Chọn ngày và giờ"
+                    placeholder="mm/dd/yyyy"
+                    type="date"
                   />
                 </div>
                 <div>
                   <DatePicker
                     name="assessmentDate"
                     label="Ngày sát hạch"
-                    placeholder="Chọn ngày và giờ"
+                    placeholder="mm/dd/yyyy"
+                    type="date"
                   />
                 </div>
               </div>
