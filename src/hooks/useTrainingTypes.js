@@ -16,11 +16,21 @@ export function useTrainingTypes(maHangDaoTao) {
       }
       try {
         const data = await danhMucsApi.getTrainingTypes(maHangDaoTao);
-        // API trả về dạng: [{ ma_hang_dt: "A1", ten_hang_dt: "Hạng A1" }]
-        return data.map((item) => ({
-          value: item.ma_hang_dt || item.value || item,
-          label: item.ten_hang_dt || item.label || item.ma_hang_dt || item,
-        }));
+        // API trả về dạng: [{ ma_gplx: "A1", ten_hang_dt: "Hạng A1" }] hoặc [{ ma_hang_dt: "A1", ten_hang_dt: "Hạng A1" }]
+        return data.map((item) => {
+          // Đảm bảo value và label luôn là string, không bao giờ là object
+          const value = item.ma_gplx || item.ma_hang_dt || item.value || String(item?.value || item || "");
+          const label = item.ten_hang_dt || item.label || String(item?.label || value || "");
+          
+          // Nếu vẫn là object, chuyển thành string
+          const safeValue = typeof value === "object" ? JSON.stringify(value) : String(value);
+          const safeLabel = typeof label === "object" ? JSON.stringify(label) : String(label);
+          
+          return {
+            value: safeValue,
+            label: safeLabel,
+          };
+        });
       } catch (error) {
         console.warn(
           "Không thể lấy danh sách loại hình đào tạo:",

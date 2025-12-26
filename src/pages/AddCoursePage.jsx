@@ -2,7 +2,14 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { FileText, Save, RotateCcw, ClipboardCheck, Users, ArrowLeft,  } from "lucide-react";
+import {
+  FileText,
+  Save,
+  RotateCcw,
+  ClipboardCheck,
+  Users,
+  ArrowLeft,
+} from "lucide-react";
 import { Button } from "../components/ui";
 import { PageHeader } from "../components/layout";
 import {
@@ -80,12 +87,12 @@ export default function AddCoursePage() {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return null;
-      
+
       // Lấy phần ngày và set giờ về 00:00:00.000Z
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      
+
       return new Date(`${year}-${month}-${day}T00:00:00.000Z`).toISOString();
     } catch (error) {
       return null;
@@ -122,9 +129,17 @@ export default function AddCoursePage() {
     };
 
     createCourse.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (response) => {
         showSuccess("Tạo khóa đào tạo thành công!");
         methods.reset();
+        // Lấy mã khóa học từ response (có thể là response.data.ma_kh hoặc response.ma_kh)
+        const courseId = response?.data?.ma_kh || response?.ma_kh;
+        if (courseId) {
+          // Điều hướng đến trang thêm học viên với mã khóa học vừa tạo
+          navigate("/hoc-vien/them", {
+            state: { courseId },
+          });
+        }
       },
       onError: (error) => {
         showError("Có lỗi xảy ra: " + (error.message || "Vui lòng thử lại"));

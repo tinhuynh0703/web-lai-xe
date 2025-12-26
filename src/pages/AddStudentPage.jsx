@@ -1,7 +1,7 @@
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Camera,
   FileImage,
@@ -90,6 +90,7 @@ export default function AddStudentPage() {
   const createStudentProfile = useCreateStudentProfile();
   const uploadStudentImage = useUploadStudentImage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
@@ -305,7 +306,7 @@ export default function AddStudentPage() {
       idCard: student.so_cmt || "-",
       permanentAddress: student.noi_thuong_tru || "-",
       currentAddress: student.noi_cu_tru || "-",
-      imagePath: "-", 
+      imagePath: "-",
       receiveDate: formatDateFromISO(student.ngay_nhan_hso),
     }));
   }, [studentsData]);
@@ -314,12 +315,7 @@ export default function AddStudentPage() {
     if (!studentSearch.trim()) return courseStudents;
     const term = studentSearch.toLowerCase();
     return courseStudents.filter((s) =>
-      [
-        s.fullName,
-        s.idCard,
-        s.permanentAddress,
-        s.currentAddress,
-      ]
+      [s.fullName, s.idCard, s.permanentAddress, s.currentAddress]
         .filter(Boolean)
         .some((field) => field.toLowerCase().includes(term))
     );
@@ -345,12 +341,12 @@ export default function AddStudentPage() {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return null;
-      
+
       // Lấy phần ngày và set giờ về 00:00:00.000Z
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      
+
       return new Date(`${year}-${month}-${day}T00:00:00.000Z`).toISOString();
     } catch (error) {
       return null;
@@ -377,9 +373,7 @@ export default function AddStudentPage() {
 
   const findAdministrativeUnit = (value) => {
     if (!value) return null;
-    return administrativeUnits.find(
-      (unit) => unit.ma_dvhc === value
-    );
+    return administrativeUnits.find((unit) => unit.ma_dvhc === value);
   };
 
   /**
@@ -398,11 +392,11 @@ export default function AddStudentPage() {
     }
 
     const nameParts = trimmedName.split(/\s+/).filter(Boolean);
-    
+
     if (nameParts.length === 0) {
       return { hoDem: "", ten: "" };
     }
-    
+
     if (nameParts.length === 1) {
       // Nếu chỉ có 1 từ, coi đó là tên
       return { hoDem: "", ten: nameParts[0] };
@@ -466,11 +460,9 @@ export default function AddStudentPage() {
       HangDaoTao: data.trainingClass || "",
       MaKhoaHoc: data.courseId || "",
       NamHocLx: 0,
-      NoiTtMaDvhc:
-        permanentAddressUnit?.ma_dvhc || "",
+      NoiTtMaDvhc: permanentAddressUnit?.ma_dvhc || "",
       NoiTtMaDvql: permanentAddressUnit?.ma_dvql || "",
-      NoiCtMaDvhc:
-        currentAddressUnit?.ma_dvhc || "",
+      NoiCtMaDvhc: currentAddressUnit?.ma_dvhc || "",
       NoiCtMaDvql: currentAddressUnit?.ma_dvql || "",
       SoNamLx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
       SoKmLxanToan: data.drivingKilometers
@@ -480,9 +472,12 @@ export default function AddStudentPage() {
       // Giấy phép lái xe đã có
       SoGplxdaCo: data.existingLicenseNumber || "",
       HangGplxdaCo: data.existingLicenseClass || "",
-      NgayTtgplxdaCo: convertDateToISODateOnly(data.existingLicenseTestDate) || "",
-      NgayCapGplxdaCo: convertDateToISODateOnly(data.existingLicenseIssueDate) || "",
-      NgayHhgplxdaCo: convertDateToISODateOnly(data.existingLicenseExpiryDate) || "",
+      NgayTtgplxdaCo:
+        convertDateToISODateOnly(data.existingLicenseTestDate) || "",
+      NgayCapGplxdaCo:
+        convertDateToISODateOnly(data.existingLicenseIssueDate) || "",
+      NgayHhgplxdaCo:
+        convertDateToISODateOnly(data.existingLicenseExpiryDate) || "",
       DonViCapGplxdaCo: data.existingLicenseIssuingUnit || "",
       NoiCapGplxdaCo: data.existingLicenseIssuingCountry || "VNM",
     };
@@ -491,7 +486,6 @@ export default function AddStudentPage() {
     if (portraitFile) {
       payload.file = portraitFile;
     }
-
 
     createStudentProfile.mutate(payload, {
       onSuccess: () => {
@@ -533,7 +527,7 @@ export default function AddStudentPage() {
     () =>
       administrativeUnits.map((unit) => ({
         value: unit.ma_dvhc,
-        label: unit.ten_day_du
+        label: unit.ten_day_du,
       })),
     [administrativeUnits]
   );
@@ -613,14 +607,14 @@ export default function AddStudentPage() {
   useEffect(() => {
     // Chỉ cập nhật khi fullName có giá trị (không phải undefined, null, hoặc empty string)
     if (fullName) {
-      methods.setValue("printName", fullName, { 
+      methods.setValue("printName", fullName, {
         shouldValidate: false,
         shouldDirty: false,
         shouldTouch: false,
       });
     } else if (fullName === "") {
       // Nếu fullName là empty string, cũng clear printName
-      methods.setValue("printName", "", { 
+      methods.setValue("printName", "", {
         shouldValidate: false,
         shouldDirty: false,
         shouldTouch: false,
@@ -642,6 +636,20 @@ export default function AddStudentPage() {
       methods.setValue("profileTypes", newProfileTypes);
     }
   }, [profileTypes, methods]);
+
+  // Tự động chọn khóa học từ location state (khi điều hướng từ trang tạo khóa học)
+  useEffect(() => {
+    const courseIdFromState = location.state?.courseId;
+    if (courseIdFromState && courses.length > 0) {
+      // Kiểm tra xem khóa học có tồn tại trong danh sách không
+      const courseExists = courses.some((c) => c.ma_kh === courseIdFromState);
+      if (courseExists) {
+        methods.setValue("courseId", courseIdFromState);
+        // Xóa state để tránh chọn lại khi refresh
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, courses, methods]);
 
   const watchedProfileTypes =
     useWatch({
@@ -678,29 +686,29 @@ export default function AddStudentPage() {
   );
 
   const studentColumns = useMemo(
-  () => [
+    () => [
       {
         header: "STT",
         cell: ({ row }) => row.index + 1,
         enableSorting: false,
       },
-      { 
-        accessorKey: "fullName", 
+      {
+        accessorKey: "fullName",
         header: "Họ và tên",
         enableSorting: true,
       },
-      { 
-        accessorKey: "dateOfBirth", 
+      {
+        accessorKey: "dateOfBirth",
         header: "Ngày sinh",
         enableSorting: false,
       },
-      { 
-        accessorKey: "gender", 
+      {
+        accessorKey: "gender",
         header: "Giới tính",
         enableSorting: true,
       },
-      { 
-        accessorKey: "idCard", 
+      {
+        accessorKey: "idCard",
         header: "CMT/HC",
         enableSorting: false,
       },
@@ -709,18 +717,18 @@ export default function AddStudentPage() {
         header: "Nơi đăng ký HKTT",
         enableSorting: false,
       },
-      { 
-        accessorKey: "currentAddress", 
+      {
+        accessorKey: "currentAddress",
         header: "Nơi cư trú",
         enableSorting: false,
       },
-      { 
-        accessorKey: "imagePath", 
+      {
+        accessorKey: "imagePath",
         header: "Đường dẫn ảnh",
         enableSorting: false,
       },
-      { 
-        accessorKey: "receiveDate", 
+      {
+        accessorKey: "receiveDate",
         header: "Ngày nhận HS",
         enableSorting: true,
       },
@@ -742,7 +750,6 @@ export default function AddStudentPage() {
     ],
     [uploadStudentImage, courseId]
   );
-
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50">
@@ -789,8 +796,18 @@ export default function AddStudentPage() {
                 type="number"
                 disabled
               />
-              <DatePicker name="openingDate" label="Ngày KG" type="date" disabled />
-              <DatePicker name="closingDate" label="Ngày BG" type="date" disabled />
+              <DatePicker
+                name="openingDate"
+                label="Ngày KG"
+                type="date"
+                disabled
+              />
+              <DatePicker
+                name="closingDate"
+                label="Ngày BG"
+                type="date"
+                disabled
+              />
               <Input
                 name="trainingClass"
                 label="Hạng ĐT"
@@ -830,7 +847,12 @@ export default function AddStudentPage() {
                 <Input name="registrationCode" label="Mã đăng ký" disabled />
                 {/* <Input name="profileNumber" label="Số Hồ sơ" /> */}
                 {/* </div> */}
-                <Input name="fullName" label="Họ và tên" required autoUppercase />
+                <Input
+                  name="fullName"
+                  label="Họ và tên"
+                  required
+                  autoUppercase
+                />
                 <Input name="printName" label="Tên in" disabled />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <DatePicker
@@ -927,7 +949,6 @@ export default function AddStudentPage() {
 
               {/* Right Column */}
               <div className="space-y-4">
-                
                 {/* Ảnh chân dung */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
