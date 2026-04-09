@@ -4,9 +4,10 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getExpandedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { cn } from "../../lib/utils";
 
 /**
@@ -18,26 +19,44 @@ export function Table({
   enablePagination = true,
   enableSorting = true,
   enableFiltering = false,
+  enableExpanding = false,
+  renderSubComponent,
   className,
   onRowClick,
+  manualPagination = false,
+  pageCount,
+  onPaginationChange,
+  initialState,
 }) {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [expanded, setExpanded] = useState({});
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: enablePagination
-      ? getPaginationRowModel()
-      : undefined,
+    getPaginationRowModel:
+      enablePagination && !manualPagination
+        ? getPaginationRowModel()
+        : undefined,
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
     getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
+    getExpandedRowModel: enableExpanding ? getExpandedRowModel() : undefined,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onExpandedChange: enableExpanding ? setExpanded : undefined,
+    onPaginationChange:
+      manualPagination && onPaginationChange ? onPaginationChange : undefined,
+    manualPagination,
+    pageCount,
+    initialState: initialState || {
+      pagination: manualPagination ? { pageIndex: 0, pageSize: 10 } : undefined,
+    },
     state: {
       sorting,
       globalFilter,
+      expanded: enableExpanding ? expanded : undefined,
     },
   });
 
@@ -94,28 +113,51 @@ export function Table({
                   </td>
                 </tr>
               ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className={cn(
-                      "hover:bg-gray-50 transition-colors",
-                      onRowClick && "cursor-pointer"
-                    )}
-                    onClick={() => onRowClick && onRowClick(row.original)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                table.getRowModel().rows.map((row) => {
+                  return (
+                    <Fragment key={row.id}>
+                      <tr
+                        className={cn(
+                          "hover:bg-gray-50 transition-colors",
+                          (onRowClick || enableExpanding) && "cursor-pointer",
+                          enableExpanding && row.getIsExpanded() && "bg-gray-50"
                         )}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                        onClick={() => {
+                          if (enableExpanding) {
+                            row.toggleExpanded();
+                          }
+                          if (onRowClick) {
+                            onRowClick(row.original);
+                          }
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                      {enableExpanding &&
+                        row.getIsExpanded() &&
+                        renderSubComponent && (
+                          <tr key={`${row.id}-expanded`}>
+                            <td
+                              colSpan={columns.length}
+                              className="p-0 border-t border-gray-200"
+                            >
+                              {renderSubComponent({ row })}
+                            </td>
+                          </tr>
+                        )}
+                    </Fragment>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -127,56 +169,100 @@ export function Table({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => table.setPageIndex(0)}
+              onClick={() => {
+                if (manualPagination && onPaginationChange) {
+                  onPaginationChange({ pageIndex: 0 });
+                } else {
+                  table.setPageIndex(0);
+                }
+              }}
               disabled={!table.getCanPreviousPage()}
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+              className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
               Đầu
             </button>
             <button
               type="button"
-              onClick={() => table.previousPage()}
+              onClick={() => {
+                if (manualPagination && onPaginationChange) {
+                  onPaginationChange({
+                    pageIndex: table.getState().pagination.pageIndex - 1,
+                  });
+                } else {
+                  table.previousPage();
+                }
+              }}
               disabled={!table.getCanPreviousPage()}
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+              className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
               Trước
             </button>
+            <span className="px-3 py-1.5 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg">
+              Trang {table.getState().pagination.pageIndex + 1} /{" "}
+              {table.getPageCount() || 1}
+            </span>
             <button
               type="button"
-              onClick={() => table.nextPage()}
+              onClick={() => {
+                if (manualPagination && onPaginationChange) {
+                  onPaginationChange({
+                    pageIndex: table.getState().pagination.pageIndex + 1,
+                  });
+                } else {
+                  table.nextPage();
+                }
+              }}
               disabled={!table.getCanNextPage()}
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+              className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
               Sau
             </button>
             <button
               type="button"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              onClick={() => {
+                if (manualPagination && onPaginationChange) {
+                  onPaginationChange({
+                    pageIndex: (table.getPageCount() || 1) - 1,
+                  });
+                } else {
+                  table.setPageIndex(table.getPageCount() - 1);
+                }
+              }}
               disabled={!table.getCanNextPage()}
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+              className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
               Cuối
             </button>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
-            <span className="text-sm text-gray-700">
-              Trang{" "}
-              <strong>
-                {table.getState().pagination.pageIndex + 1} /{" "}
-                {table.getPageCount()}
-              </strong>
-            </span>
-            <select
-              value={table.getState().pagination.pageSize}
-              onChange={(e) => table.setPageSize(Number(e.target.value))}
-              className="px-3 py-1 text-sm border border-gray-300 rounded"
-            >
-              {[10, 20, 30, 50, 100].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  Hiển thị {pageSize}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            {manualPagination && (
+              <span className="text-sm text-gray-700">
+                Tổng cộng: <strong>{pageCount || 0}</strong> items
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <label htmlFor="pageSize" className="text-sm text-gray-700">
+                Hiển thị:
+              </label>
+              <select
+                id="pageSize"
+                value={table.getState().pagination.pageSize}
+                onChange={(e) => {
+                  const newPageSize = Number(e.target.value);
+                  table.setPageSize(newPageSize);
+                  if (manualPagination && onPaginationChange) {
+                    onPaginationChange({ pageSize: newPageSize, pageIndex: 0 });
+                  }
+                }}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              >
+                {[10, 20, 30, 50, 100].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       )}

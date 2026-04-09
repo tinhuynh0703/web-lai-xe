@@ -163,7 +163,7 @@ export default function AddCoursePage() {
       <div className="container mx-auto px-4 sm:px-6 py-4">
         {/* Form */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <Form methods={methods} onSubmit={onSubmit} className="p-8">
+          <Form methods={methods} onSubmit={onSubmit} className="p-4">
             <div className="space-y-5">
               {/* Full width fields */}
               <InputWithPrefix
@@ -352,6 +352,7 @@ export default function AddCoursePage() {
                 type="button"
                 variant="secondary"
                 size="md"
+                onClick={() => navigate("/lich-hoc")}
                 className="min-w-[180px] w-full sm:w-auto"
               >
                 <ClipboardCheck className="w-4 h-4 mr-2" />

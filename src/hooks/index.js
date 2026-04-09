@@ -18,3 +18,7 @@ export { useNationalities } from "./useNationalities";
 export { useDebounce } from "./useDebounce";
 export { useLocalStorage } from "./useLocalStorage";
 export { useClickOutside } from "./useClickOutside";
+export { useScheduleCenter } from "./useScheduleCenter";
+export { useTrainingPlans } from "./useTrainingPlans";
+export { useCoursesWithoutSchedule } from "./useCoursesWithoutSchedule";
+export { useCreateDefaultSchedule, useCreateManySchedules, useUpdateManySchedules } from "./useCreateSchedule";

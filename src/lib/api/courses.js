@@ -34,4 +34,8 @@ export const coursesApi = {
   // Lấy danh sách khóa học theo thời gian
   getByDateRange: () =>
     api.post("/KhoaHocs/danh-sach-khoa-hoc-theo-thoi-gian", {}),
+
+  // Lấy danh sách khóa học chưa có lịch học
+  getCoursesWithoutSchedule: () =>
+    api.post("/KhoaHocs/danh-sach-khoa-hoc-chua-co-lich-hoc", {}),
 };

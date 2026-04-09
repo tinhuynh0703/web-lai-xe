@@ -1,49 +1,33 @@
-import { forwardRef, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useFormContext } from "react-hook-form";
-import { ChevronDown, AlertCircle } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 /**
- * SingleSelect component với custom dropdown và validation từ React Hook Form
+ * Select component đơn giản không cần React Hook Form
  */
-export const SingleSelect = forwardRef(function SingleSelect(
-  {
-    name,
-    label,
-    options = [],
-    placeholder = "Chọn loại",
-    className,
-    disabled,
-    required,
-    ...props
-  },
-  ref
-) {
-  const {
-    register,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useFormContext();
-
+export function Select({
+  value,
+  onChange,
+  options = [],
+  placeholder = "Chọn loại",
+  className,
+  disabled,
+  label,
+  required,
+  onFocus,
+  onBlur,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+  const isClickingRef = useRef(false);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     left: 0,
     width: 0,
   });
-  const selectedValue = watch(name) || "";
-
-  const error = errors[name];
-
-  // Đăng ký field với React Hook Form
-  useEffect(() => {
-    register(name);
-  }, [register, name]);
 
   // Tính toán vị trí dropdown đơn giản
   useEffect(() => {
@@ -76,9 +60,16 @@ export const SingleSelect = forwardRef(function SingleSelect(
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
     function handleClickOutside(event) {
+      // Kiểm tra xem click có phải vào dropdown hoặc button không
       const clickedInDropdown = dropdownRef.current?.contains(event.target);
       const clickedInButton = buttonRef.current?.contains(event.target);
       
+      // Nếu click vào option button trong dropdown, không đóng
+      if (clickedInDropdown && event.target.tagName === 'BUTTON') {
+        return;
+      }
+      
+      // Chỉ đóng nếu click hoàn toàn bên ngoài
       if (!clickedInDropdown && !clickedInButton) {
         setIsOpen(false);
         setSearchTerm("");
@@ -86,6 +77,7 @@ export const SingleSelect = forwardRef(function SingleSelect(
     }
 
     if (isOpen) {
+      // Sử dụng capture phase để bắt event sớm hơn
       document.addEventListener("mousedown", handleClickOutside, true);
       return () => {
         document.removeEventListener("mousedown", handleClickOutside, true);
@@ -93,10 +85,56 @@ export const SingleSelect = forwardRef(function SingleSelect(
     }
   }, [isOpen]);
 
-  const handleSelect = (value) => {
-    setValue(name, value, { shouldValidate: true });
+  const handleSelect = (selectedValue, event) => {
+    // Prevent event propagation để tránh click outside handler can thiệp
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
+    // Gọi onChange trước khi đóng dropdown
+    if (onChange) {
+      onChange(selectedValue);
+    }
+    
+    // Đóng dropdown ngay lập tức sau khi onChange được gọi
     setIsOpen(false);
     setSearchTerm("");
+  };
+
+  // Xử lý click để mở/đóng dropdown
+  const handleButtonClick = (e) => {
+    if (disabled) return;
+    setIsOpen(!isOpen);
+  };
+
+  // Xử lý mouseDown để prevent blur khi click
+  const handleMouseDown = (e) => {
+    if (disabled) return;
+    // Đánh dấu đang trong quá trình click
+    isClickingRef.current = true;
+    // Prevent default để tránh blur event
+    e.preventDefault();
+    // Reset flag sau một chút
+    setTimeout(() => {
+      isClickingRef.current = false;
+    }, 100);
+  };
+
+  // Xử lý blur, chỉ gọi onBlur khi không phải do click
+  const handleBlur = (e) => {
+    // Delay để kiểm tra xem có phải click vào dropdown không
+    setTimeout(() => {
+      if (
+        !isClickingRef.current &&
+        !isOpen &&
+        document.activeElement !== buttonRef.current &&
+        (!dropdownRef.current ||
+          !dropdownRef.current.contains(document.activeElement))
+      ) {
+        onBlur?.(e);
+      }
+    }, 150);
   };
 
   const filteredOptions = options.filter((option) => {
@@ -112,22 +150,17 @@ export const SingleSelect = forwardRef(function SingleSelect(
     return typeof option === "object" ? option.value : option;
   };
 
-  const selectedLabel = selectedValue
+  const selectedLabel = value
     ? (() => {
-        const option = options.find(
-          (opt) => getOptionValue(opt) === selectedValue
-        );
-        return option ? getOptionLabel(option) : selectedValue;
+        const option = options.find((opt) => getOptionValue(opt) === value);
+        return option ? getOptionLabel(option) : value;
       })()
     : "";
 
   return (
-    <div className="w-full" ref={dropdownRef}>
+    <div className="w-full">
       {label && (
-        <label
-          htmlFor={name}
-          className="block text-sm font-semibold text-gray-700 mb-2"
-        >
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           {label}
           {required && <span className="text-red-500 ml-1 font-bold">*</span>}
         </label>
@@ -136,7 +169,10 @@ export const SingleSelect = forwardRef(function SingleSelect(
         <button
           ref={buttonRef}
           type="button"
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={handleButtonClick}
+          onMouseDown={handleMouseDown}
+          onFocus={onFocus}
+          onBlur={handleBlur}
           disabled={disabled}
           className={cn(
             "w-full px-4 py-2.5 border rounded-lg transition-all duration-200 bg-white",
@@ -144,21 +180,22 @@ export const SingleSelect = forwardRef(function SingleSelect(
             "disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-500",
             "text-gray-900 cursor-pointer text-left",
             "hover:border-gray-400",
-            error
-              ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
-              : "border-gray-300",
+            "border-gray-300",
             className
           )}
         >
           <span
-            className={cn("block truncate", !selectedLabel && "text-gray-400")}
+            className={cn(
+              "block truncate pr-8",
+              !selectedLabel && "text-gray-400"
+            )}
           >
             {selectedLabel || placeholder}
           </span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <ChevronDown
               className={cn(
-                "h-5 w-5 text-gray-400 transition-transform duration-200",
+                "h-5 w-5 text-gray-400 transition-transform duration-200 flex-shrink-0",
                 isOpen && "transform rotate-180"
               )}
             />
@@ -171,7 +208,7 @@ export const SingleSelect = forwardRef(function SingleSelect(
           createPortal(
             <div
               ref={dropdownRef}
-              className="fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-lg max-h-70 overflow-hidden"
+              className="fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-xl max-h-70 overflow-hidden"
               style={{
                 top: `${dropdownPosition.top}px`,
                 left: `${dropdownPosition.left}px`,
@@ -180,7 +217,7 @@ export const SingleSelect = forwardRef(function SingleSelect(
               }}
             >
               {/* Search input */}
-              {options.length > 5 && (
+              {options.length > 10 && (
                 <div className="p-2 border-b border-gray-200">
                   <input
                     type="text"
@@ -200,15 +237,21 @@ export const SingleSelect = forwardRef(function SingleSelect(
                   </div>
                 ) : (
                   filteredOptions.map((option) => {
-                    const value = getOptionValue(option);
-                    const label = getOptionLabel(option);
-                    const isSelected = selectedValue === value;
+                    const optionValue = getOptionValue(option);
+                    const optionLabel = getOptionLabel(option);
+                    const isSelected = value === optionValue;
 
                     return (
                       <button
-                        key={value}
+                        key={optionValue}
                         type="button"
-                        onClick={() => handleSelect(value)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelect(optionValue, e);
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                        }}
                         className={cn(
                           "w-full px-4 py-2.5 text-left text-sm transition-colors duration-150",
                           "hover:bg-blue-50 hover:text-blue-900",
@@ -216,7 +259,7 @@ export const SingleSelect = forwardRef(function SingleSelect(
                           isSelected && "bg-blue-100 text-blue-900 font-medium"
                         )}
                       >
-                        {label}
+                        {optionLabel}
                       </button>
                     );
                   })
@@ -226,12 +269,6 @@ export const SingleSelect = forwardRef(function SingleSelect(
             document.body
           )}
       </div>
-      {error && (
-        <p className="mt-1.5 text-sm text-red-600 font-medium flex items-center gap-1">
-          <AlertCircle className="w-4 h-4" />
-          {error.message}
-        </p>
-      )}
     </div>
   );
-});
+}

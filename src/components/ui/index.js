@@ -6,6 +6,8 @@ export { Table } from './Table'
 export { Loading } from './Loading'
 export { Alert } from './Alert'
 export { Modal } from './Modal'
+export { Select } from './Select'
+export { SearchInput } from './SearchInput'
 export {
   Card,
   CardHeader,

@@ -31,7 +31,7 @@ export default function LoginPage() {
     mode: "onSubmit",
     reValidateMode: "onChange",
     shouldFocusError: true,
-    criteriaMode: "all", 
+    criteriaMode: "all",
     defaultValues: {
       username: "",
       password: "",
@@ -59,7 +59,7 @@ export default function LoginPage() {
         user_name: data.username,
         password: data.password,
       });
-      console.log(result)
+      console.log(result);
 
       if (!result.success) {
         console.error("Login failed:", result.error);
@@ -88,12 +88,8 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-          <Form
-            methods={methods}
-            onSubmit={onSubmit}
-            className="space-y-6"
-          >
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+          <Form methods={methods} onSubmit={onSubmit} className="space-y-6">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <User className="w-4 h-4 text-gray-500" />

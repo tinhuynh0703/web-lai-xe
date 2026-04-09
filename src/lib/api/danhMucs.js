@@ -20,4 +20,7 @@ export const danhMucsApi = {
 
   // Lấy danh sách loại quốc tịch
   getNationalities: () => api.get("/DanhMucs/loai-quoc-tich"),
+
+  // Lấy danh sách tên kế hoạch đào tạo
+  getTrainingPlanNames: () => api.get("/DanhMucs/ten-ke-hoach-dao-tao"),
 };
