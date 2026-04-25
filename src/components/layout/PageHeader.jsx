@@ -8,6 +8,7 @@ export function PageHeader({
   sectionTitle,
   sectionDescription,
   icon: Icon = FileText,
+  sectionAction = null,
 }) {
   return (
     <>
@@ -24,10 +25,17 @@ export function PageHeader({
       {/* Section Header */}
       {sectionTitle && (
         <div className="container mx-auto px-6 py-4">
-          <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <Icon className="w-6 h-6 text-blue-600" />
-            {sectionTitle}
-          </h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <Icon className="w-6 h-6 text-blue-600" />
+              {sectionTitle}
+            </h2>
+            {sectionAction && (
+              <div className="w-full sm:w-auto flex sm:justify-end">
+                {sectionAction}
+              </div>
+            )}
+          </div>
           {sectionDescription && (
             <p className="text-sm text-gray-500 mt-1">{sectionDescription}</p>
           )}

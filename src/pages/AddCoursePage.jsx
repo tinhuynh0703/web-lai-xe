@@ -158,6 +158,18 @@ export default function AddCoursePage() {
         sectionTitle="Thông tin khóa đào tạo"
         sectionDescription="Vui lòng điền đầy đủ thông tin các trường có dấu *"
         icon={FileText}
+        sectionAction={
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            onClick={() => navigate(-1)}
+            className="min-w-[110px] w-full sm:w-auto"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại
+          </Button>
+        }
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-4">
@@ -326,17 +338,6 @@ export default function AddCoursePage() {
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-3 mt-10 pt-8 border-t border-gray-200 bg-gray-50/50 -mx-8 -mb-8 px-8 pb-8">
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => navigate(-1)}
-                className="min-w-[110px] w-full sm:w-auto"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Quay lại
-              </Button>
-
               <Button
                 type="button"
                 variant="secondary"

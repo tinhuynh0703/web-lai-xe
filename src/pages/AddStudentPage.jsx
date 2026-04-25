@@ -86,6 +86,27 @@ function UploadImageAction({ maDk, courseId, uploadStudentImage }) {
 }
 import { showSuccess, showError } from "../utils";
 
+const OLD_LICENSE_CLASSES = [
+  "A1",
+  "A11",
+  "A2",
+  "A3",
+  "B1",
+  "B11",
+  "B12",
+  "B13",
+  "B14",
+  "B15",
+  "B2",
+  "C",
+  "D",
+  "E",
+  "FB2",
+  "FC",
+  "FD",
+  "FE",
+].map((item) => ({ value: item, label: item }));
+
 export default function AddStudentPage() {
   const createStudentProfile = useCreateStudentProfile();
   const uploadStudentImage = useUploadStudentImage();
@@ -194,7 +215,7 @@ export default function AddStudentPage() {
         keepErrors: false,
         keepDirty: false,
         keepTouched: false,
-      }
+      },
     );
   };
 
@@ -248,7 +269,7 @@ export default function AddStudentPage() {
         keepErrors: false,
         keepDirty: false,
         keepTouched: false,
-      }
+      },
     );
     // Reset ảnh chân dung
     setPortraitFile(null);
@@ -317,7 +338,7 @@ export default function AddStudentPage() {
     return courseStudents.filter((s) =>
       [s.fullName, s.idCard, s.permanentAddress, s.currentAddress]
         .filter(Boolean)
-        .some((field) => field.toLowerCase().includes(term))
+        .some((field) => field.toLowerCase().includes(term)),
     );
   }, [courseStudents, studentSearch]);
 
@@ -411,11 +432,11 @@ export default function AddStudentPage() {
 
   const onSubmit = (data) => {
     const duplicateStudent = courseStudents.find(
-      (s) => s.idCard === data.idCard
+      (s) => s.idCard === data.idCard,
     );
     if (duplicateStudent) {
       setModalMessage(
-        "Số CMND/ HC bạn nhập đã có trong khóa học này. Xin vui lòng nhập lại số khác"
+        "Số CMND/ HC bạn nhập đã có trong khóa học này. Xin vui lòng nhập lại số khác",
       );
       setIsModalOpen(true);
       return;
@@ -429,7 +450,7 @@ export default function AddStudentPage() {
       Object.entries(data.profileTypes).forEach(([maLoaiHs, isSelected]) => {
         if (isSelected === true) {
           const profileType = profileTypes.find(
-            (pt) => pt.ma_loai_hs.toString() === maLoaiHs
+            (pt) => pt.ma_loai_hs.toString() === maLoaiHs,
           );
           if (profileType) {
             giayTos.push({
@@ -494,7 +515,7 @@ export default function AddStudentPage() {
       },
       onError: (error) => {
         showError(
-          error.message || "Có lỗi xảy ra khi thêm học viên. Vui lòng thử lại."
+          error.message || "Có lỗi xảy ra khi thêm học viên. Vui lòng thử lại.",
         );
       },
     });
@@ -504,6 +525,16 @@ export default function AddStudentPage() {
   const fullName = useWatch({
     control: methods.control,
     name: "fullName",
+  });
+  const existingLicenseStatus = useWatch({
+    control: methods.control,
+    name: "existingLicenseStatus",
+    defaultValue: "",
+  });
+  const existingLicenseClass = useWatch({
+    control: methods.control,
+    name: "existingLicenseClass",
+    defaultValue: "",
   });
 
   const { data: courses = [], isLoading: isLoadingCourses } =
@@ -529,7 +560,7 @@ export default function AddStudentPage() {
         value: unit.ma_dvhc,
         label: unit.ten_day_du,
       })),
-    [administrativeUnits]
+    [administrativeUnits],
   );
 
   const nationalityOptions = useMemo(
@@ -538,7 +569,7 @@ export default function AddStudentPage() {
         value: nationality.ma,
         label: nationality.ten_vn,
       })),
-    [nationalities]
+    [nationalities],
   );
 
   const selectedCourse = useMemo(() => {
@@ -587,17 +618,18 @@ export default function AddStudentPage() {
       methods.setValue("gplxClass", selectedCourse.hang_gplx || "");
       methods.setValue("trainingClass", selectedCourse.hang_dt || "");
       methods.setValue("totalStudents", selectedCourse.tong_so_hv || "");
+      methods.setValue("currentStudents", selectedCourse.tong_so_hv || "");
       methods.setValue(
         "openingDate",
-        formatToDateLocal(selectedCourse.ngay_kg)
+        formatToDateLocal(selectedCourse.ngay_kg),
       );
       methods.setValue(
         "closingDate",
-        formatToDateLocal(selectedCourse.ngay_bg)
+        formatToDateLocal(selectedCourse.ngay_bg),
       );
       methods.setValue(
         "profileReceiveDate",
-        formatToDateLocal(selectedCourse.ngay_nhan_hs)
+        formatToDateLocal(selectedCourse.ngay_nhan_hs),
       );
       methods.setValue("minimumAge", selectedCourse.tuoi_toi_thieu || "18");
     }
@@ -682,8 +714,28 @@ export default function AddStudentPage() {
           course.ten_kh || ""
         } (ngày KG: ${formatDateForDisplay(course.ngay_kg)})`,
       })),
-    [courses]
+    [courses],
   );
+
+  const existingLicenseClassOptions = useMemo(() => {
+    if (existingLicenseStatus === "Cu") {
+      return OLD_LICENSE_CLASSES;
+    }
+    return gplxClasses;
+  }, [existingLicenseStatus, gplxClasses]);
+
+  const isLoadingExistingLicenseClasses =
+    existingLicenseStatus === "Moi" ? isLoadingGplxClasses : false;
+
+  useEffect(() => {
+    if (!existingLicenseClass) return;
+    const isValid = existingLicenseClassOptions.some(
+      (option) => option.value === existingLicenseClass,
+    );
+    if (!isValid) {
+      methods.setValue("existingLicenseClass", "");
+    }
+  }, [existingLicenseClass, existingLicenseClassOptions, methods]);
 
   const studentColumns = useMemo(
     () => [
@@ -748,7 +800,7 @@ export default function AddStudentPage() {
         },
       },
     ],
-    [uploadStudentImage, courseId]
+    [uploadStudentImage, courseId],
   );
 
   return (
@@ -758,6 +810,17 @@ export default function AddStudentPage() {
         sectionTitle="Thông tin Hồ sơ"
         sectionDescription="Vui lòng điền đầy đủ thông tin các trường có dấu *"
         icon={FileText}
+        sectionAction={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="w-full sm:w-auto"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại
+          </Button>
+        }
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-4">
@@ -777,8 +840,8 @@ export default function AddStudentPage() {
                     isLoadingCourses
                       ? "Đang tải danh sách khóa học..."
                       : courseOptions.length === 0
-                      ? "Không có khóa học"
-                      : "Chọn khóa học"
+                        ? "Không có khóa học"
+                        : "Chọn khóa học"
                   }
                   disabled={isLoadingCourses}
                   required
@@ -879,8 +942,8 @@ export default function AddStudentPage() {
                       isLoadingNationalities
                         ? "Đang tải danh sách quốc tịch..."
                         : nationalityOptions.length === 0
-                        ? "Không có dữ liệu"
-                        : "Chọn quốc tịch"
+                          ? "Không có dữ liệu"
+                          : "Chọn quốc tịch"
                     }
                     disabled={isLoadingNationalities}
                     required
@@ -1019,15 +1082,15 @@ export default function AddStudentPage() {
                       <SingleSelect
                         name="existingLicenseClass"
                         label="Hạng GPLX"
-                        options={gplxClasses}
+                        options={existingLicenseClassOptions}
                         placeholder={
-                          isLoadingGplxClasses
+                          isLoadingExistingLicenseClasses
                             ? "Đang tải..."
-                            : gplxClasses.length === 0
-                            ? "Không có dữ liệu"
-                            : "Chọn hạng"
+                            : existingLicenseClassOptions.length === 0
+                              ? "Không có dữ liệu"
+                              : "Chọn hạng"
                         }
-                        disabled={isLoadingGplxClasses}
+                        disabled={isLoadingExistingLicenseClasses}
                       />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1133,15 +1196,6 @@ export default function AddStudentPage() {
 
           {/* Submit button */}
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pb-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Quay lại
-            </Button>
             <Button
               type="button"
               variant="secondary"

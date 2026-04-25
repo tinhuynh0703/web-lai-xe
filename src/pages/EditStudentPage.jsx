@@ -367,6 +367,17 @@ export default function EditStudentPage() {
         sectionTitle="Thông tin Hồ sơ"
         sectionDescription="Vui lòng điền đầy đủ thông tin các trường có dấu *"
         icon={FileImage}
+        sectionAction={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="w-full sm:w-auto"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại
+          </Button>
+        }
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-4">
@@ -609,15 +620,6 @@ export default function EditStudentPage() {
 
           {/* Submit button */}
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pb-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Quay lại
-            </Button>
             <Button
               type="submit"
               variant="primary"
