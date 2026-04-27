@@ -31,6 +31,19 @@ export function Table({
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [expanded, setExpanded] = useState({});
+  const [pagination, setPagination] = useState(() => ({
+    pageIndex: 0,
+    pageSize: 10,
+    ...(initialState?.pagination ?? {}),
+  }));
+
+  const tableInitialState = initialState
+    ? Object.fromEntries(
+        Object.entries(initialState).filter(([key]) => key !== "pagination"),
+      )
+    : undefined;
+  const hasTableInitialState =
+    tableInitialState && Object.keys(tableInitialState).length > 0;
 
   const table = useReactTable({
     data,
@@ -46,17 +59,22 @@ export function Table({
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     onExpandedChange: enableExpanding ? setExpanded : undefined,
-    onPaginationChange:
-      manualPagination && onPaginationChange ? onPaginationChange : undefined,
+    onPaginationChange: enablePagination
+      ? (updater) => {
+          if (manualPagination && onPaginationChange) {
+            onPaginationChange(updater);
+          }
+          setPagination(updater);
+        }
+      : undefined,
     manualPagination,
     pageCount,
-    initialState: initialState || {
-      pagination: manualPagination ? { pageIndex: 0, pageSize: 10 } : undefined,
-    },
+    initialState: hasTableInitialState ? tableInitialState : undefined,
     state: {
       sorting,
       globalFilter,
       expanded: enableExpanding ? expanded : undefined,
+      ...(enablePagination ? { pagination } : {}),
     },
   });
 
@@ -169,13 +187,7 @@ export function Table({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                if (manualPagination && onPaginationChange) {
-                  onPaginationChange({ pageIndex: 0 });
-                } else {
-                  table.setPageIndex(0);
-                }
-              }}
+              onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
               className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
@@ -183,15 +195,7 @@ export function Table({
             </button>
             <button
               type="button"
-              onClick={() => {
-                if (manualPagination && onPaginationChange) {
-                  onPaginationChange({
-                    pageIndex: table.getState().pagination.pageIndex - 1,
-                  });
-                } else {
-                  table.previousPage();
-                }
-              }}
+              onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
               className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
@@ -203,15 +207,7 @@ export function Table({
             </span>
             <button
               type="button"
-              onClick={() => {
-                if (manualPagination && onPaginationChange) {
-                  onPaginationChange({
-                    pageIndex: table.getState().pagination.pageIndex + 1,
-                  });
-                } else {
-                  table.nextPage();
-                }
-              }}
+              onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
               className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
@@ -219,15 +215,9 @@ export function Table({
             </button>
             <button
               type="button"
-              onClick={() => {
-                if (manualPagination && onPaginationChange) {
-                  onPaginationChange({
-                    pageIndex: (table.getPageCount() || 1) - 1,
-                  });
-                } else {
-                  table.setPageIndex(table.getPageCount() - 1);
-                }
-              }}
+              onClick={() =>
+                table.setPageIndex(Math.max(0, table.getPageCount() - 1))
+              }
               disabled={!table.getCanNextPage()}
               className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors bg-white"
             >
@@ -248,11 +238,7 @@ export function Table({
                 id="pageSize"
                 value={table.getState().pagination.pageSize}
                 onChange={(e) => {
-                  const newPageSize = Number(e.target.value);
-                  table.setPageSize(newPageSize);
-                  if (manualPagination && onPaginationChange) {
-                    onPaginationChange({ pageSize: newPageSize, pageIndex: 0 });
-                  }
+                  table.setPageSize(Number(e.target.value));
                 }}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
               >
