@@ -17,4 +17,6 @@ export const ROUTES = {
   EDIT_STUDENT: "/hoc-vien/chinh-sua/:maDK",
   DASHBOARD: "/dashboard",
   SCHEDULE: "/lich-hoc",
+  TUITION_PROFILES: "/ke-toan/ho-so-hoc-phi",
+  TUITION_PAYMENT_HISTORY: "/ke-toan/ho-so-hoc-phi/:maDK",
 };

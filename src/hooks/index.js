@@ -22,3 +22,4 @@ export { useScheduleCenter } from "./useScheduleCenter";
 export { useTrainingPlans } from "./useTrainingPlans";
 export { useCoursesWithoutSchedule } from "./useCoursesWithoutSchedule";
 export { useCreateDefaultSchedule, useCreateManySchedules, useUpdateManySchedules } from "./useCreateSchedule";
+export { useTuitionProfiles, useTuitionPaymentHistory } from "./useTuition";

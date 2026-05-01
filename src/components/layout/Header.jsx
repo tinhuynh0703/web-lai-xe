@@ -22,6 +22,7 @@ export function Header() {
     { to: ROUTES.HOME, label: "Trang Chủ" },
     { to: ROUTES.COURSES, label: "Khóa Đào Tạo" },
     { to: ROUTES.STUDENTS, label: "Học Viên" },
+    { to: ROUTES.TUITION_PROFILES, label: "Kế Toán" },
   ];
 
   const renderLinks = (onClick) =>

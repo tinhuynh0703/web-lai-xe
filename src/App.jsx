@@ -8,6 +8,8 @@ import AddCoursePage from "./pages/AddCoursePage";
 import AddStudentPage from "./pages/AddStudentPage";
 import EditStudentPage from "./pages/EditStudentPage";
 import ScheduleCenterPage from "./pages/ScheduleCenterPage";
+import TuitionProfilesPage from "./pages/TuitionProfilesPage";
+import TuitionPaymentHistoryPage from "./pages/TuitionPaymentHistoryPage";
 import LoginPage from "./pages/LoginPage";
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
                   <Route path="hoc-vien/them" element={<AddStudentPage />} />
                   <Route path="hoc-vien/chinh-sua/:maDK" element={<EditStudentPage />} />
                   <Route path="lich-hoc" element={<ScheduleCenterPage />} />
+                  <Route path="ke-toan/ho-so-hoc-phi" element={<TuitionProfilesPage />} />
+                  <Route path="ke-toan/ho-so-hoc-phi/:maDK" element={<TuitionPaymentHistoryPage />} />
                   <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
                 </Routes>
               </Layout>
