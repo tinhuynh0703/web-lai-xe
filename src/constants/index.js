@@ -19,4 +19,5 @@ export const ROUTES = {
   SCHEDULE: "/lich-hoc",
   TUITION_PROFILES: "/ke-toan/ho-so-hoc-phi",
   TUITION_PAYMENT_HISTORY: "/ke-toan/ho-so-hoc-phi/:maDK",
+  NHAT_KY_CHUNG_TU: "/ke-toan/nhat-ky-chung-tu",
 };

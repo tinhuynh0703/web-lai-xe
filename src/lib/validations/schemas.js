@@ -137,3 +137,32 @@ export const enrollmentSchema = yup.object({
   courseId: yup.string().required("Vui lòng chọn khóa học"),
   studentId: yup.string().required("Vui lòng chọn học viên"),
 });
+
+// Schema cho form nộp học phí
+export const tuitionPaymentSchema = yup.object({
+  soTienNop: yup
+    .number()
+    .typeError("Số tiền nộp phải là số")
+    .required("Số tiền nộp là bắt buộc")
+    .moreThan(0, "Số tiền nộp phải lớn hơn 0"),
+  ngayNop: yup.string().trim().required("Ngày nộp là bắt buộc"),
+  taiKhoanNo: yup.string().trim().required("Tài khoản nợ là bắt buộc"),
+  taiKhoanCo: yup.string().trim().required("Tài khoản có là bắt buộc"),
+  soBienLai: yup.string().optional().default(""),
+  ghiChu: yup.string().optional().default(""),
+});
+
+// Schema cho form nhật ký chứng từ
+export const nhatKyChungTuSchema = yup.object({
+  soChungTu: yup.string().trim().required("Số chứng từ là bắt buộc"),
+  ngayLap: yup.string().trim().required("Ngày lập là bắt buộc"),
+  dienGiai: yup.string().trim().required("Diễn giải là bắt buộc"),
+  taiKhoanNo: yup.string().trim().required("Tài khoản nợ là bắt buộc"),
+  taiKhoanCo: yup.string().trim().required("Tài khoản có là bắt buộc"),
+  soTien: yup
+    .number()
+    .typeError("Số tiền phải là số")
+    .required("Số tiền là bắt buộc")
+    .moreThan(0, "Số tiền phải lớn hơn 0"),
+  ghiChu: yup.string().optional().default(""),
+});

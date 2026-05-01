@@ -63,12 +63,12 @@ export default function AddCoursePage() {
     () =>
       trainingClasses.find((item) => item.value === selectedTrainingClass) ||
       null,
-    [trainingClasses, selectedTrainingClass]
+    [trainingClasses, selectedTrainingClass],
   );
 
   const { data: trainingTypes = [], isLoading: isLoadingTrainingTypes } =
     useTrainingTypes(
-      selectedTrainingClassOption?.maHangMoi || selectedTrainingClass
+      selectedTrainingClassOption?.maHangMoi || selectedTrainingClass,
     );
 
   useEffect(() => {
@@ -156,7 +156,7 @@ export default function AddCoursePage() {
       <PageHeader
         title="Thêm khóa đào tạo"
         sectionTitle="Thông tin khóa đào tạo"
-        sectionDescription="Vui lòng điền đầy đủ thông tin các trường có dấu *"
+        sectionDescription="Khai báo thông tin khóa học để quản lý kế hoạch đào tạo và lịch trình giảng dạy"
         icon={FileText}
         sectionAction={
           <Button
@@ -240,10 +240,10 @@ export default function AddCoursePage() {
                       !selectedTrainingClass
                         ? "Vui lòng chọn hạng đào tạo trước"
                         : isLoadingTrainingTypes
-                        ? "Đang tải..."
-                        : trainingTypes.length === 0
-                        ? "Không có loại hình đào tạo"
-                        : "Chọn loại hình đào tạo"
+                          ? "Đang tải..."
+                          : trainingTypes.length === 0
+                            ? "Không có loại hình đào tạo"
+                            : "Chọn loại hình đào tạo"
                     }
                     disabled={!selectedTrainingClass || isLoadingTrainingTypes}
                   />
@@ -262,7 +262,7 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="decisionDateKG"
                     label="Ngày quyết định KG"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                     type="date"
                   />
                 </div>
@@ -273,7 +273,7 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="openingDate"
                     label="Ngày khai giảng"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                     type="date"
                     required
                   />
@@ -282,7 +282,7 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="closingDate"
                     label="Ngày bế giảng"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                     type="date"
                     required
                   />
@@ -294,7 +294,7 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="examDate"
                     label="Ngày thi"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                     type="date"
                   />
                 </div>
@@ -302,7 +302,7 @@ export default function AddCoursePage() {
                   <DatePicker
                     name="assessmentDate"
                     label="Ngày sát hạch"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                     type="date"
                   />
                 </div>

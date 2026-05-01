@@ -23,4 +23,6 @@ export const danhMucsApi = {
 
   // Lấy danh sách tên kế hoạch đào tạo
   getTrainingPlanNames: () => api.get("/DanhMucs/ten-ke-hoach-dao-tao"),
+
+  getAccountingAccountTree: () => api.get("/DmTaiKhoanKeToan/tree"),
 };

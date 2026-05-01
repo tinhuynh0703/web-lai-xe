@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "../constants";
-import { UserPlus, BookOpen, Calendar, CreditCard } from "lucide-react";
+import { UserPlus, BookOpen, Calendar, CreditCard, BookText } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -140,6 +140,40 @@ export default function HomePage() {
                     Tra cứu tình trạng nộp học phí và xem lịch sử thanh toán theo từng học viên
                   </p>
                   <div className="flex items-center text-orange-600 font-medium">
+                    <span>Bắt đầu ngay</span>
+                    <svg
+                      className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          <Link to={ROUTES.NHAT_KY_CHUNG_TU} className="group">
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border border-gray-100 hover:border-cyan-300 h-full">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 w-14 h-14 bg-cyan-100 rounded-lg flex items-center justify-center group-hover:bg-cyan-600 transition-colors duration-300">
+                  <BookText className="w-7 h-7 text-cyan-600 group-hover:text-white transition-colors duration-300" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">
+                    Nhật ký chứng từ
+                  </h2>
+                  <p className="text-gray-600 mb-4">
+                    Tổng hợp và theo dõi chứng từ kế toán theo thời gian, tài khoản nợ và tài khoản có
+                  </p>
+                  <div className="flex items-center text-cyan-600 font-medium">
                     <span>Bắt đầu ngay</span>
                     <svg
                       className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"

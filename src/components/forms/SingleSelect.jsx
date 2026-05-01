@@ -16,6 +16,7 @@ export const SingleSelect = forwardRef(function SingleSelect(
     className,
     disabled,
     required,
+    onChange,
     ...props
   },
   ref
@@ -95,6 +96,9 @@ export const SingleSelect = forwardRef(function SingleSelect(
 
   const handleSelect = (value) => {
     setValue(name, value, { shouldValidate: true });
+    if (typeof onChange === "function") {
+      onChange(value);
+    }
     setIsOpen(false);
     setSearchTerm("");
   };

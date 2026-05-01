@@ -8,10 +8,10 @@
  * @returns {string}
  */
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-  }).format(amount)
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(amount);
 }
 
 /**
@@ -20,20 +20,25 @@ export function formatCurrency(amount) {
  * @param {string} format
  * @returns {string}
  */
-export function formatDate(date, format = 'dd/MM/yyyy') {
-  if (!date) return ''
-  
-  const d = new Date(date)
-  if (isNaN(d.getTime())) return ''
+export function formatDate(date, format = "dd/MM/yyyy") {
+  if (!date) return "";
 
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const year = d.getFullYear()
+  // Support compact date string yyyymmdd, e.g. "20030404"
+  if (typeof date === "string" && /^\d{8}$/.test(date)) {
+    const year = date.slice(0, 4);
+    const month = date.slice(4, 6);
+    const day = date.slice(6, 8);
+    return format.replace("dd", day).replace("MM", month).replace("yyyy", year);
+  }
 
-  return format
-    .replace('dd', day)
-    .replace('MM', month)
-    .replace('yyyy', year)
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return format.replace("dd", day).replace("MM", month).replace("yyyy", year);
 }
 
 /**
@@ -42,12 +47,12 @@ export function formatDate(date, format = 'dd/MM/yyyy') {
  * @returns {string}
  */
 export function formatPhone(phone) {
-  if (!phone) return ''
-  const cleaned = phone.replace(/\D/g, '')
+  if (!phone) return "";
+  const cleaned = phone.replace(/\D/g, "");
   if (cleaned.length === 10) {
-    return cleaned.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+    return cleaned.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3");
   }
-  return phone
+  return phone;
 }
 
 /**
@@ -56,16 +61,10 @@ export function formatPhone(phone) {
  * @returns {string}
  */
 export function formatName(name) {
-  if (!name) return ''
+  if (!name) return "";
   return name
     .toLowerCase()
-    .split(' ')
+    .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
+    .join(" ");
 }
-
-
-
-
-
-

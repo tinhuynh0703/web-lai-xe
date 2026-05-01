@@ -808,7 +808,7 @@ export default function AddStudentPage() {
       <PageHeader
         title="Thu nhận Hồ sơ cấp mới"
         sectionTitle="Thông tin Hồ sơ"
-        sectionDescription="Vui lòng điền đầy đủ thông tin các trường có dấu *"
+        sectionDescription="Tiếp nhận và quản lý hồ sơ học viên phục vụ quá trình đào tạo và theo dõi chứng từ"
         icon={FileText}
         sectionAction={
           <Button
@@ -923,7 +923,7 @@ export default function AddStudentPage() {
                     label="Ngày sinh"
                     required
                     type="date"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                   />
                   <SingleSelect
                     name="gender"
@@ -955,7 +955,7 @@ export default function AddStudentPage() {
                     name="idCardIssueDate"
                     label="Ngày cấp"
                     type="date"
-                    placeholder="mm/dd/yyyy"
+                    placeholder="dd/MM/yyyy"
                   />
                   <Input name="idCardIssuePlace" label="Nơi cấp" />
                 </div>
@@ -1097,19 +1097,19 @@ export default function AddStudentPage() {
                       <DatePicker
                         name="existingLicenseTestDate"
                         label="Ngày TT"
-                        placeholder="mm/dd/yyyy"
+                        placeholder="dd/MM/yyyy"
                         type="date"
                       />
                       <DatePicker
                         name="existingLicenseIssueDate"
                         label="Ngày cấp"
-                        placeholder="mm/dd/yyyy"
+                        placeholder="dd/MM/yyyy"
                         type="date"
                       />
                       <DatePicker
                         name="existingLicenseExpiryDate"
                         label="Ngày HH"
-                        placeholder="mm/dd/yyyy"
+                        placeholder="dd/MM/yyyy"
                         type="date"
                       />
                     </div>

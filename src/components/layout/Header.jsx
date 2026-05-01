@@ -22,7 +22,8 @@ export function Header() {
     { to: ROUTES.HOME, label: "Trang Chủ" },
     { to: ROUTES.COURSES, label: "Khóa Đào Tạo" },
     { to: ROUTES.STUDENTS, label: "Học Viên" },
-    { to: ROUTES.TUITION_PROFILES, label: "Kế Toán" },
+    { to: ROUTES.TUITION_PROFILES, label: "Hồ Sơ Học Phí" },
+    { to: ROUTES.NHAT_KY_CHUNG_TU, label: "Nhật Ký CT" },
   ];
 
   const renderLinks = (onClick) =>

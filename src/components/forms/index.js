@@ -9,3 +9,4 @@ export { MultiSelect } from "./MultiSelect";
 export { Form } from "./Form";
 export { Checkbox } from "./Checkbox";
 export { DatePicker } from "./DatePicker";
+export { TreeSelect } from "./TreeSelect";

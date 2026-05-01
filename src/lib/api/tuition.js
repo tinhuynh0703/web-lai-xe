@@ -6,4 +6,19 @@ export const tuitionApi = {
 
   getPaymentHistoryByMaDk: (maDk) =>
     api.get(`/LichSuNopHocPhi/by-ma-dk/${encodeURIComponent(maDk)}`),
+
+  createPaymentHistory: (payload) => api.post("/LichSuNopHocPhi", payload),
+
+  deletePaymentHistoryById: (idNopTien) =>
+    api.delete(`/LichSuNopHocPhi/${encodeURIComponent(idNopTien)}`),
+
+  getNhatKyChungTu: ({ fromDate, toDate }) =>
+    api.get("/NhatKyChungTu", {
+      params: {
+        fromDate,
+        toDate,
+      },
+    }),
+
+  createNhatKyChungTu: (payload) => api.post("/NhatKyChungTu", payload),
 };

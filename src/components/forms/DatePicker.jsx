@@ -1,7 +1,35 @@
 import { forwardRef } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { AlertCircle, Calendar } from "lucide-react";
+import ReactDatePicker from "react-datepicker";
+import { vi } from "date-fns/locale";
 import { cn } from "../../lib/utils";
+import "react-datepicker/dist/react-datepicker.css";
+
+function parseDateValue(value) {
+  if (!value) return null;
+  if (value instanceof Date)
+    return Number.isNaN(value.getTime()) ? null : value;
+
+  if (typeof value === "string") {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  return null;
+}
+
+function formatDateToYmd(date) {
+  if (!date || Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 /**
  * DatePicker component với validation từ React Hook Form
@@ -17,7 +45,7 @@ export const DatePicker = forwardRef(function DatePicker(
     type = "datetime-local",
     ...props
   },
-  ref
+  ref,
 ) {
   const {
     control,
@@ -44,6 +72,44 @@ export const DatePicker = forwardRef(function DatePicker(
           render={({ field }) => {
             const { ref: fieldRef, value, ...restField } = field;
 
+            if (type === "date") {
+              return (
+                <div className="w-full [&_.react-datepicker-wrapper]:w-full [&_.react-datepicker__input-container]:w-full">
+                  <ReactDatePicker
+                    selected={parseDateValue(value)}
+                    onChange={(selectedDate) => {
+                      restField.onChange(formatDateToYmd(selectedDate));
+                    }}
+                    onBlur={restField.onBlur}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText={placeholder || "dd/MM/yyyy"}
+                    locale={vi}
+                    disabled={disabled}
+                    className={cn(
+                      "w-full px-4 py-2.5 pl-10 border rounded-lg transition-all duration-200",
+                      "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                      "disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-500",
+                      "placeholder:text-gray-400 text-gray-900",
+                      "hover:border-gray-400",
+                      error
+                        ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
+                        : "border-gray-300 bg-white",
+                      className,
+                    )}
+                    {...props}
+                    ref={(e) => {
+                      fieldRef(e);
+                      if (typeof ref === "function") {
+                        ref(e);
+                      } else if (ref) {
+                        ref.current = e;
+                      }
+                    }}
+                  />
+                </div>
+              );
+            }
+
             return (
               <input
                 id={name}
@@ -59,7 +125,7 @@ export const DatePicker = forwardRef(function DatePicker(
                   error
                     ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
                     : "border-gray-300 bg-white",
-                  className
+                  className,
                 )}
                 {...restField}
                 {...props}
@@ -87,4 +153,3 @@ export const DatePicker = forwardRef(function DatePicker(
     </div>
   );
 });
-
