@@ -31,11 +31,8 @@ export function objectToFormData(data) {
   const formData = new FormData()
   
   Object.entries(data).forEach(([key, value]) => {
-    if (value === null) {
-      formData.append(key, "")
-      return
-    }
-    if (value === undefined) {
+    // Bỏ qua null/undefined: không append (tránh gửi "" — API .NET báo lỗi với chuỗi rỗng cho int?)
+    if (value === null || value === undefined) {
       return
     }
     

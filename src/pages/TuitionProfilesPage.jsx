@@ -5,7 +5,11 @@ import { ArrowLeft, CreditCard } from "lucide-react";
 import { PageHeader } from "../components/layout";
 import { Form, SingleSelect, Input, DatePicker } from "../components/forms";
 import { Table, Loading, Button } from "../components/ui";
-import { useCoursesByDateRange, useTuitionProfiles } from "../hooks";
+import {
+  useCoursesByDateRange,
+  useTuitionProfiles,
+  useStudentsByCourse,
+} from "../hooks";
 import { formatCurrency, formatDate } from "../utils/format";
 
 export default function TuitionProfilesPage() {
@@ -37,6 +41,7 @@ export default function TuitionProfilesPage() {
   const maHangGplx = selectedCourse?.hang_gplx || "";
   const { data: tuitionProfiles = [], isLoading: isLoadingProfiles } =
     useTuitionProfiles(selectedCourseId, maHangGplx);
+  const { data: studentsInCourse = [] } = useStudentsByCourse(selectedCourseId);
 
   const formatToDateLocal = (isoString) => {
     if (!isoString) return "";
@@ -83,8 +88,15 @@ export default function TuitionProfilesPage() {
       formatToDateLocal(selectedCourse.ngay_nhan_hs),
     );
     methods.setValue("totalStudents", selectedCourse.tong_so_hv || "");
-    methods.setValue("currentStudents", selectedCourse.tong_so_hv || "");
   }, [selectedCourse, methods]);
+
+  useEffect(() => {
+    if (!selectedCourseId) {
+      methods.setValue("currentStudents", "");
+      return;
+    }
+    methods.setValue("currentStudents", String(studentsInCourse?.length ?? 0));
+  }, [selectedCourseId, studentsInCourse, methods]);
 
   const tableData = useMemo(
     () =>

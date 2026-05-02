@@ -492,12 +492,9 @@ export default function AddStudentPage() {
       // Giấy phép lái xe đã có
       SoGplxdaCo: data.existingLicenseNumber || "",
       HangGplxdaCo: data.existingLicenseClass || "",
-      NgayTtgplxdaCo:
-        convertDateToISODateOnly(data.existingLicenseTestDate) || "",
-      NgayCapGplxdaCo:
-        convertDateToISODateOnly(data.existingLicenseIssueDate) || "",
-      NgayHhgplxdaCo:
-        convertDateToISODateOnly(data.existingLicenseExpiryDate) || "",
+      NgayTtgplxdaCo: formatDateToYYYYMMDD(data.existingLicenseTestDate),
+      NgayCapGplxdaCo: formatDateToYYYYMMDD(data.existingLicenseIssueDate),
+      NgayHhgplxdaCo: formatDateToYYYYMMDD(data.existingLicenseExpiryDate),
       DonViCapGplxdaCo: data.existingLicenseIssuingUnit || "",
       NoiCapGplxdaCo: data.existingLicenseIssuingCountry || "VNM",
     };
@@ -617,7 +614,6 @@ export default function AddStudentPage() {
       methods.setValue("gplxClass", selectedCourse.hang_gplx || "");
       methods.setValue("trainingClass", selectedCourse.hang_dt || "");
       methods.setValue("totalStudents", selectedCourse.tong_so_hv || "");
-      methods.setValue("currentStudents", selectedCourse.tong_so_hv || "");
       methods.setValue(
         "openingDate",
         formatToDateLocal(selectedCourse.ngay_kg),
@@ -633,6 +629,14 @@ export default function AddStudentPage() {
       methods.setValue("minimumAge", selectedCourse.tuoi_toi_thieu || "18");
     }
   }, [courseId, selectedCourse, methods]);
+
+  useEffect(() => {
+    if (!courseId) {
+      methods.setValue("currentStudents", "");
+      return;
+    }
+    methods.setValue("currentStudents", String(studentsData?.length ?? 0));
+  }, [courseId, studentsData, methods]);
 
   // Tự động điền "Tên in" khi "Họ và tên" thay đổi
   useEffect(() => {

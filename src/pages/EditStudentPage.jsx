@@ -100,6 +100,14 @@ export default function EditStudentPage() {
       }
     };
 
+    /** Ngày từ API: yyyyMMdd (như ngay_sinh) hoặc ISO */
+    const apiDateToDateInput = (raw) => {
+      if (raw == null || raw === "") return "";
+      const s = String(raw).trim();
+      if (/^\d{8}$/.test(s)) return formatDateFromYYYYMMDDToInput(s);
+      return formatISOToDateInput(s);
+    };
+
     console.log("Setting form values with studentData:", {
       ten_nlx: studentData.ten_nlx,
       ma_dk: studentData.ma_dk,
@@ -135,9 +143,9 @@ export default function EditStudentPage() {
     // Giấy phép lái xe đã có
     setValue("existingLicenseNumber", studentData.so_gplxda_co || "", { shouldValidate: false, shouldDirty: false });
     setValue("existingLicenseClass", studentData.hang_gplxda_co || "", { shouldValidate: false, shouldDirty: false });
-    setValue("existingLicenseTestDate", formatISOToDateInput(studentData.ngay_ttgplxda_co), { shouldValidate: false, shouldDirty: false });
-    setValue("existingLicenseIssueDate", formatISOToDateInput(studentData.ngay_cap_gplxda_co), { shouldValidate: false, shouldDirty: false });
-    setValue("existingLicenseExpiryDate", formatISOToDateInput(studentData.ngay_hhgplxda_co), { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseTestDate", apiDateToDateInput(studentData.ngay_ttgplxda_co), { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseIssueDate", apiDateToDateInput(studentData.ngay_cap_gplxda_co), { shouldValidate: false, shouldDirty: false });
+    setValue("existingLicenseExpiryDate", apiDateToDateInput(studentData.ngay_hhgplxda_co), { shouldValidate: false, shouldDirty: false });
     setValue("existingLicenseIssuingUnit", studentData.don_vi_cap_gplxda_co || "", { shouldValidate: false, shouldDirty: false });
     setValue("existingLicenseIssuingCountry", studentData.noi_cap_gplxda_co || "VNM", { shouldValidate: false, shouldDirty: false });
   }, [studentData, studentMethods.setValue]);
@@ -314,9 +322,9 @@ export default function EditStudentPage() {
       // Giấy phép lái xe đã có
       SoGplxDaCo: data.existingLicenseNumber || "",
       HangGplxDaCo: data.existingLicenseClass || "",
-      NgayTtgplxDaCo: convertDateToISO(data.existingLicenseTestDate) || "",
-      NgayCapGplxDaCo: convertDateToISO(data.existingLicenseIssueDate) || "",
-      NgayHhgplxDaCo: convertDateToISO(data.existingLicenseExpiryDate) || "",
+      NgayTtgplxDaCo: formatDateToYYYYMMDD(data.existingLicenseTestDate),
+      NgayCapGplxDaCo: formatDateToYYYYMMDD(data.existingLicenseIssueDate),
+      NgayHhgplxDaCo: formatDateToYYYYMMDD(data.existingLicenseExpiryDate),
       DonViCapGplxDaCo: data.existingLicenseIssuingUnit || "",
       NoiCapGplxDaCo: data.existingLicenseIssuingCountry || "VNM",
     };
