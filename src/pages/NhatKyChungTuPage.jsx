@@ -162,7 +162,12 @@ export default function NhatKyChungTuPage() {
         sectionDescription="Theo dõi các bút toán chứng từ theo khoảng thời gian"
         icon={BookText}
         sectionAction={
-          <Button type="button" variant="outline" onClick={() => navigate(-1)} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="w-full sm:w-auto"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Quay lại
           </Button>

@@ -20,5 +20,10 @@ export const tuitionApi = {
       },
     }),
 
+  getTongHopTaiKhoanChaTheoThoiGian: ({ fromDate, toDate }) =>
+    api.get("/NhatKyChungTu/tong-hop-theo-tai-khoan-cha-theo-thoi-gian", {
+      params: { fromDate, toDate },
+    }),
+
   createNhatKyChungTu: (payload) => api.post("/NhatKyChungTu", payload),
 };

@@ -24,6 +24,7 @@ export function Header() {
     { to: ROUTES.STUDENTS, label: "Học Viên" },
     { to: ROUTES.TUITION_PROFILES, label: "Hồ Sơ Học Phí" },
     { to: ROUTES.NHAT_KY_CHUNG_TU, label: "Nhật Ký CT" },
+    { to: ROUTES.BANG_CAN_DOI_TAI_KHOAN, label: "Cân đối TK" },
   ];
 
   const renderLinks = (onClick) =>

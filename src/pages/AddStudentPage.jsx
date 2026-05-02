@@ -27,6 +27,7 @@ import {
   DatePicker,
 } from "../components/forms";
 import { studentEnrollmentSchema } from "../lib/validations/schemas";
+import { parseFormOptionalInt } from "../lib/utils";
 import { GENDERS } from "../constants";
 import {
   useCoursesByDateRange,
@@ -485,10 +486,8 @@ export default function AddStudentPage() {
       NoiTtMaDvql: permanentAddressUnit?.ma_dvql || "",
       NoiCtMaDvhc: currentAddressUnit?.ma_dvhc || "",
       NoiCtMaDvql: currentAddressUnit?.ma_dvql || "",
-      SoNamLx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
-      SoKmLxanToan: data.drivingKilometers
-        ? parseInt(data.drivingKilometers) || 0
-        : 0,
+      SoNamLx: parseFormOptionalInt(data.drivingYears),
+      SoKmLxanToan: parseFormOptionalInt(data.drivingKilometers),
       GiayTos: giayTos,
       // Giấy phép lái xe đã có
       SoGplxdaCo: data.existingLicenseNumber || "",

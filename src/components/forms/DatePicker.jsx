@@ -84,6 +84,11 @@ export const DatePicker = forwardRef(function DatePicker(
                     dateFormat="dd/MM/yyyy"
                     placeholderText={placeholder || "dd/MM/yyyy"}
                     locale={vi}
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={120}
                     disabled={disabled}
                     className={cn(
                       "w-full px-4 py-2.5 pl-10 border rounded-lg transition-all duration-200",

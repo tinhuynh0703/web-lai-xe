@@ -15,11 +15,27 @@ export function cn(...inputs) {
     .trim()
 }
 
+/**
+ * Ô số form: để trống -> null; có giá trị -> số nguyên (kể cả 0).
+ */
+export function parseFormOptionalInt(value) {
+  if (value === undefined || value === null) return null;
+  const s = String(value).trim();
+  if (s === "") return null;
+  const n = parseInt(s, 10);
+  if (Number.isNaN(n)) return null;
+  return n;
+}
+
 export function objectToFormData(data) {
   const formData = new FormData()
   
   Object.entries(data).forEach(([key, value]) => {
-    if (value === null || value === undefined) {
+    if (value === null) {
+      formData.append(key, "")
+      return
+    }
+    if (value === undefined) {
       return
     }
     

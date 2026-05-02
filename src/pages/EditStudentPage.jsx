@@ -28,6 +28,7 @@ import {
   useTrainingClasses,
 } from "../hooks";
 import { showSuccess, showError } from "../utils";
+import { parseFormOptionalInt } from "../lib/utils";
 
 export default function EditStudentPage() {
   const { maDK } = useParams();
@@ -305,10 +306,8 @@ export default function EditStudentPage() {
         currentAddressUnit?.ma_dvhc || "",
       NoiCtMaDvql: currentAddressUnit?.ma_dvql || "",
       DuongDanAnh: studentData.duong_dan_anh || "",
-      SoNamLx: data.drivingYears ? parseInt(data.drivingYears) || 0 : 0,
-      SoKmLxanToan: data.drivingKilometers
-        ? parseInt(data.drivingKilometers) || 0
-        : 0,
+      SoNamLx: parseFormOptionalInt(data.drivingYears),
+      SoKmLxanToan: parseFormOptionalInt(data.drivingKilometers),
       GiayTos: giayTos,
       MaDk: studentData.ma_dk || maDK || "",
       MaLoaiHs: studentData.ma_loai_hs || 0,

@@ -77,3 +77,20 @@ export function useCreateNhatKyChungTu() {
     },
   });
 }
+
+export function useTongHopTaiKhoanChaTheoThoiGian(fromDate, toDate) {
+  return useQuery({
+    queryKey: ["tongHopTaiKhoanChaTheoThoiGian", fromDate, toDate],
+    queryFn: async () => {
+      const res = await tuitionApi.getTongHopTaiKhoanChaTheoThoiGian({
+        fromDate,
+        toDate,
+      });
+      if (Array.isArray(res)) return res;
+      if (res && Array.isArray(res.data)) return res.data;
+      return [];
+    },
+    enabled: Boolean(fromDate && toDate),
+    placeholderData: [],
+  });
+}

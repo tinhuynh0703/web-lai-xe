@@ -11,6 +11,7 @@ import ScheduleCenterPage from "./pages/ScheduleCenterPage";
 import TuitionProfilesPage from "./pages/TuitionProfilesPage";
 import TuitionPaymentHistoryPage from "./pages/TuitionPaymentHistoryPage";
 import NhatKyChungTuPage from "./pages/NhatKyChungTuPage";
+import BangCanDoiTaiKhoanPage from "./pages/BangCanDoiTaiKhoanPage";
 import LoginPage from "./pages/LoginPage";
 
 function App() {
@@ -32,6 +33,10 @@ function App() {
                   <Route path="ke-toan/ho-so-hoc-phi" element={<TuitionProfilesPage />} />
                   <Route path="ke-toan/ho-so-hoc-phi/:maDK" element={<TuitionPaymentHistoryPage />} />
                   <Route path="ke-toan/nhat-ky-chung-tu" element={<NhatKyChungTuPage />} />
+                  <Route
+                    path="ke-toan/bang-can-doi-tai-khoan"
+                    element={<BangCanDoiTaiKhoanPage />}
+                  />
                   <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
                 </Routes>
               </Layout>

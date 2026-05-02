@@ -30,4 +30,5 @@ export {
   useDeleteTuitionPaymentHistory,
   useNhatKyChungTu,
   useCreateNhatKyChungTu,
+  useTongHopTaiKhoanChaTheoThoiGian,
 } from "./useTuition";
