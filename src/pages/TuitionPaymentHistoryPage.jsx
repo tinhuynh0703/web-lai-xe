@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "../components/layout";
 import { Button, Loading, Modal, Table } from "../components/ui";
 import {
@@ -12,6 +12,7 @@ import {
   Textarea,
   TreeSelect,
 } from "../components/forms";
+import { cn } from "../lib/utils";
 import {
   useAccountingAccountTree,
   useCreateTuitionPaymentHistory,
@@ -19,7 +20,11 @@ import {
   useTuitionPaymentHistory,
 } from "../hooks";
 import { ROUTES } from "../constants";
-import { formatCurrency, formatDate } from "../utils/format";
+import {
+  formatDate,
+  formatVndAmountDisplay,
+  formatVndGrouped,
+} from "../utils/format";
 import { showError, showSuccess } from "../utils";
 import { tuitionPaymentSchema } from "../lib/validations/schemas";
 
@@ -49,7 +54,7 @@ export default function TuitionPaymentHistoryPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const formDefaults = useMemo(
     () => ({
-      soTienNop: "",
+      soTienNop: undefined,
       ngayNop: getTodayString(),
       taiKhoanNo: "",
       taiKhoanCo: "",
@@ -109,7 +114,7 @@ export default function TuitionPaymentHistoryPage() {
       {
         accessorKey: "soTienNop",
         header: "Số tiền nộp",
-        cell: ({ row }) => formatCurrency(row.original.soTienNop),
+        cell: ({ row }) => formatVndAmountDisplay(row.original.soTienNop),
       },
       { accessorKey: "ngayNop", header: "Ngày nộp" },
       {
@@ -241,19 +246,19 @@ export default function TuitionPaymentHistoryPage() {
               <div>
                 <p className="text-xs text-gray-500">Tổng học phí</p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {formatCurrency(hocPhi)}
+                  {formatVndAmountDisplay(hocPhi)}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Đã nộp</p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {formatCurrency(totalPaid)}
+                  {formatVndAmountDisplay(totalPaid)}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Còn lại</p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {formatCurrency(Math.max(hocPhi - totalPaid, 0))}
+                  {formatVndAmountDisplay(Math.max(hocPhi - totalPaid, 0))}
                 </p>
               </div>
               <div>
@@ -278,13 +283,56 @@ export default function TuitionPaymentHistoryPage() {
           </h2>
           <Form methods={methods} onSubmit={handleCreatePayment}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Input
+              <Controller
                 name="soTienNop"
-                label="Số tiền nộp"
-                type="number"
-                min="0"
-                step="1"
-                required
+                control={methods.control}
+                render={({ field, fieldState }) => (
+                  <div className="w-full">
+                    <label
+                      htmlFor="soTienNop"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
+                      Số tiền nộp
+                      <span className="text-red-500 ml-1 font-bold">*</span>
+                    </label>
+                    <input
+                      id="soTienNop"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="0"
+                      className={cn(
+                        "w-full px-4 py-2.5 border rounded-lg transition-all duration-200",
+                        "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                        "placeholder:text-gray-400 text-gray-900 hover:border-gray-400",
+                        fieldState.error
+                          ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
+                          : "border-gray-300 bg-white",
+                      )}
+                      value={
+                        field.value === undefined ||
+                        field.value === null ||
+                        field.value === ""
+                          ? ""
+                          : formatVndGrouped(field.value)
+                      }
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "");
+                        field.onChange(
+                          raw === "" ? undefined : Number(raw),
+                        );
+                      }}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                    />
+                    {fieldState.error && (
+                      <p className="mt-1.5 text-sm text-red-600 font-medium flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </div>
+                )}
               />
               <DatePicker
                 name="ngayNop"

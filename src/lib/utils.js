@@ -27,6 +27,28 @@ export function parseFormOptionalInt(value) {
   return n;
 }
 
+/**
+ * Lọc theo chuỗi: so khớp nếu bất kỳ giá trị nguyên thủy nào của object chứa chuỗi tìm (không phân biệt hoa thường).
+ * @param {Record<string, unknown>} rowObject
+ * @param {unknown} filterValue
+ */
+export function rowMatchesGlobalSearch(rowObject, filterValue) {
+  const q = String(filterValue ?? "").trim().toLowerCase();
+  if (!q) return true;
+  if (rowObject == null || typeof rowObject !== "object") return false;
+  return Object.values(rowObject).some((val) => {
+    if (val == null) return false;
+    if (typeof val === "object") {
+      try {
+        return JSON.stringify(val).toLowerCase().includes(q);
+      } catch {
+        return false;
+      }
+    }
+    return String(val).toLowerCase().includes(q);
+  });
+}
+
 export function objectToFormData(data) {
   const formData = new FormData()
   

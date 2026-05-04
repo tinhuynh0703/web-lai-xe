@@ -1,12 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
+  getFilteredRowModel,
   flexRender,
 } from "@tanstack/react-table";
 import { Select } from "../ui/Select";
+import { SearchInput } from "../ui/SearchInput";
 import { formatDateToDDMMYYYY } from "../../utils/scheduleHelpers";
-import { cn } from "../../lib/utils";
+import { cn, rowMatchesGlobalSearch } from "../../lib/utils";
 
 export function ScheduleEditTable({
   data = [],
@@ -16,6 +18,8 @@ export function ScheduleEditTable({
   onGiaiDoanChange,
   onEditingIndexChange,
 }) {
+  const [globalFilter, setGlobalFilter] = useState("");
+
   const columns = useMemo(
     () => [
       {
@@ -78,16 +82,12 @@ export function ScheduleEditTable({
         header: "Kiểm tra",
         cell: ({ getValue }) => {
           const value = getValue();
-          return (
-            <div className="text-sm text-gray-900">
-              {value ? (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-300">
-                  {value}
-                </span>
-              ) : (
-                "-"
-              )}
-            </div>
+          return value ? (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-300">
+              {value}
+            </span>
+          ) : (
+            "-"
           );
         },
       },
@@ -110,11 +110,23 @@ export function ScheduleEditTable({
   const table = useReactTable({
     data,
     columns,
+    state: { globalFilter },
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, _columnId, filterValue) =>
+      rowMatchesGlobalSearch(row.original, filterValue),
   });
 
   return (
     <div className="w-full">
+      <div className="mb-3">
+        <SearchInput
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Tìm kiếm..."
+        />
+      </div>
       <div className="rounded-md border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-full">

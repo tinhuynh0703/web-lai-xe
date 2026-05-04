@@ -6,6 +6,8 @@ import {
 } from "../../utils/scheduleHelpers";
 import { cn } from "../../lib/utils";
 import { Select } from "../ui/Select";
+import { SearchInput } from "../ui/SearchInput";
+import { rowMatchesGlobalSearch } from "../../lib/utils";
 import { useTrainingPlans, useUpdateManySchedules } from "../../hooks";
 import { showSuccess, showError } from "../../utils";
 
@@ -26,7 +28,28 @@ export function ScheduleMatrixTable({
 }) {
   // State để track ô đang được edit: { courseKey, weekKey }
   const [editingCell, setEditingCell] = useState(null);
+  const [matrixSearch, setMatrixSearch] = useState("");
   const tableRef = useRef(null);
+
+  const filteredScheduleData = useMemo(() => {
+    const list = data || [];
+    const q = matrixSearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((course) => {
+      const ma = course.ma_kh || course.maKh || "";
+      const soLuong =
+        course.so_luong_hoc_vien ?? course.soLuongHocVien ?? "";
+      const flat = { ma_kh: ma, so_luong_hoc_vien: soLuong };
+      if (rowMatchesGlobalSearch(flat, q)) return true;
+      try {
+        return JSON.stringify(course.thong_tin_chi_tiets || [])
+          .toLowerCase()
+          .includes(q);
+      } catch {
+        return false;
+      }
+    });
+  }, [data, matrixSearch]);
 
   // Fetch training plans để lấy danh sách giai đoạn
   const { data: trainingPlans = [], isLoading: isLoadingPlans } =
@@ -118,7 +141,7 @@ export function ScheduleMatrixTable({
 
   // Xử lý dữ liệu để tạo timeline và map vào grid
   const { timeline, gridData, courses } = useMemo(() => {
-    if (!data || data.length === 0) {
+    if (!filteredScheduleData || filteredScheduleData.length === 0) {
       return { timeline: [], gridData: new Map(), courses: [] };
     }
 
@@ -127,7 +150,7 @@ export function ScheduleMatrixTable({
     const courseMap = new Map();
     const weekInfoMap = new Map(); // Lưu thông tin chi tiết của từng tuần
 
-    data.forEach((course) => {
+    filteredScheduleData.forEach((course) => {
       const courseKey = course.ma_kh || course.maKh;
       const scheduleDetails = course.thong_tin_chi_tiets || [];
       const studentCount =
@@ -255,7 +278,7 @@ export function ScheduleMatrixTable({
       gridData: courseMap,
       courses: Array.from(courseMap.values()),
     };
-  }, [data]);
+  }, [filteredScheduleData]);
 
   // Format tháng để hiển thị (ví dụ: "01/2025")
   const formatMonth = (monthYearKey) => {
@@ -611,10 +634,27 @@ export function ScheduleMatrixTable({
     );
   };
 
-  if (courses.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-12 text-center text-gray-500">
         Không có dữ liệu lịch học
+      </div>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <SearchInput
+            value={matrixSearch}
+            onChange={(e) => setMatrixSearch(e.target.value)}
+            placeholder="Tìm kiếm mã khóa học, số HV..."
+          />
+        </div>
+        <div className="p-12 text-center text-sm text-gray-500">
+          Không có khóa học khớp tìm kiếm
+        </div>
       </div>
     );
   }
@@ -624,6 +664,13 @@ export function ScheduleMatrixTable({
       className="bg-white border border-gray-200 rounded-lg overflow-visible"
       ref={tableRef}
     >
+      <div className="px-4 pt-4 pb-2 border-b border-gray-200 bg-white">
+        <SearchInput
+          value={matrixSearch}
+          onChange={(e) => setMatrixSearch(e.target.value)}
+          placeholder="Tìm kiếm mã khóa học, số HV..."
+        />
+      </div>
       {/* Table với sticky columns */}
       <div className="overflow-x-auto overflow-y-visible">
         <div className="inline-block min-w-full">

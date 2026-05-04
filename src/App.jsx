@@ -12,6 +12,8 @@ import TuitionProfilesPage from "./pages/TuitionProfilesPage";
 import TuitionPaymentHistoryPage from "./pages/TuitionPaymentHistoryPage";
 import NhatKyChungTuPage from "./pages/NhatKyChungTuPage";
 import BangCanDoiTaiKhoanPage from "./pages/BangCanDoiTaiKhoanPage";
+import ThongKeHocPhiPage from "./pages/ThongKeHocPhiPage";
+import LichSuNopHocPhiPage from "./pages/LichSuNopHocPhiPage";
 import LoginPage from "./pages/LoginPage";
 
 function App() {
@@ -36,6 +38,14 @@ function App() {
                   <Route
                     path="ke-toan/bang-can-doi-tai-khoan"
                     element={<BangCanDoiTaiKhoanPage />}
+                  />
+                  <Route
+                    path="ke-toan/thong-ke-hoc-phi"
+                    element={<ThongKeHocPhiPage />}
+                  />
+                  <Route
+                    path="ke-toan/lich-su-nop-hoc-phi"
+                    element={<LichSuNopHocPhiPage />}
                   />
                   <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
                 </Routes>

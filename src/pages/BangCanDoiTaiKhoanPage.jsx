@@ -183,37 +183,26 @@ export default function BangCanDoiTaiKhoanPage() {
                 enablePagination
                 enableSorting
                 initialState={{ pagination: { pageSize: 20 } }}
+                renderTableFooter={() => (
+                  <tr className="bg-gray-100 font-semibold border-t-2 border-gray-200">
+                    <td
+                      colSpan={3}
+                      className="px-6 py-4 text-center text-sm text-gray-900"
+                    >
+                      TỔNG CỘNG
+                    </td>
+                    <td className="px-6 py-4 text-right tabular-nums text-sm text-gray-900">
+                      {formatCurrency(totals.tongNo)}
+                    </td>
+                    <td className="px-6 py-4 text-right tabular-nums text-sm text-gray-900">
+                      {formatCurrency(totals.tongCo)}
+                    </td>
+                    <td className="px-6 py-4 text-right tabular-nums text-sm text-gray-900">
+                      {formatCurrency(totals.chenhLech)}
+                    </td>
+                  </tr>
+                )}
               />
-              {tableData.length > 0 && (
-                <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                    <div className="flex justify-between sm:block gap-2">
-                      <span className="font-semibold text-gray-700">
-                        Tổng Nợ:
-                      </span>
-                      <span className="tabular-nums ml-2 text-right font-medium text-gray-900">
-                        {formatCurrency(totals.tongNo)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between sm:block gap-2">
-                      <span className="font-semibold text-gray-700">
-                        Tổng Có:
-                      </span>
-                      <span className="tabular-nums ml-2 text-right font-medium text-gray-900">
-                        {formatCurrency(totals.tongCo)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between sm:block gap-2">
-                      <span className="font-semibold text-gray-700">
-                        Tổng chênh lệch:
-                      </span>
-                      <span className="tabular-nums ml-2 text-right font-medium text-gray-900">
-                        {formatCurrency(totals.chenhLech)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>

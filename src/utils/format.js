@@ -15,6 +15,45 @@ export function formatCurrency(amount) {
 }
 
 /**
+ * Phần số có dấu chấm nghìn (vd. 1.234.567)
+ * @param {number|string} amount
+ * @returns {string}
+ */
+export function formatVndGrouped(amount) {
+  if (amount == null || amount === "") return "";
+  const n = Number(amount);
+  if (Number.isNaN(n)) return "";
+  const rounded = Math.round(n);
+  return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/**
+ * Hiển thị số tiền kiểu kế toán: x.xxx.xxx
+ * @param {number|string} amount
+ * @returns {string}
+ */
+export function formatVndAmountDisplay(amount) {
+  return formatVndGrouped(amount);
+}
+
+/**
+ * Tải file từ Blob (Excel, PDF, …)
+ * @param {Blob} blob
+ * @param {string} filename
+ */
+export function downloadFileFromBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
  * Format ngày tháng
  * @param {string|Date} date
  * @param {string} format

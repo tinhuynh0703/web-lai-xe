@@ -70,7 +70,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
+    <div className="login-page-shell min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo và Title */}
         <div className="text-center mb-8">
@@ -88,7 +88,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
           <Form methods={methods} onSubmit={onSubmit} className="space-y-6">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
@@ -131,12 +131,12 @@ export default function LoginPage() {
                   Ghi nhớ đăng nhập
                 </span>
               </label>
-              <a
+              {/* <a
                 href="#"
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 Quên mật khẩu?
-              </a>
+              </a> */}
             </div>
 
             <Button
@@ -154,7 +154,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            © 2025 Trung Tâm Đào Tạo Lái Xe. All rights reserved.
+            © 2026 Trung Tâm Đào Tạo Lái Xe. All rights reserved.
           </p>
         </div>
       </div>

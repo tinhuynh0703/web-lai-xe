@@ -69,19 +69,25 @@ async function applyErrorInterceptors(error) {
 }
 
 async function apiClient(endpoint, options = {}) {
+  const {
+    blobResponse = false,
+    timeoutMs = 5000,
+    ...restOptions
+  } = options;
+
   const url = `${API_BASE_URL}${endpoint}`;
 
   const defaultHeaders = {};
-  if (!options.headers || !("Content-Type" in options.headers)) {
+  if (!restOptions.headers || !("Content-Type" in restOptions.headers)) {
     defaultHeaders["Content-Type"] = "application/json";
   }
 
   let config = {
     headers: {
       ...defaultHeaders,
-      ...options.headers,
+      ...restOptions.headers,
     },
-    ...options,
+    ...restOptions,
   };
 
   // Thêm token nếu có (default request interceptor)
@@ -94,9 +100,9 @@ async function apiClient(endpoint, options = {}) {
     // Áp dụng request interceptors
     config = await applyRequestInterceptors(config);
 
-    // Thêm timeout (5 giây)
+    // Timeout (mặc định 5s; có thể tăng, vd. tải file)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     config.signal = controller.signal;
 
     // Gửi request
@@ -134,11 +140,21 @@ async function apiClient(endpoint, options = {}) {
         throw new Error("Lỗi máy chủ. Vui lòng thử lại sau.");
       }
 
-      // Xử lý lỗi khác
-      const error = await processedResponse.json().catch(() => ({
-        message: processedResponse.statusText,
-      }));
-      throw new Error(error.message || "Có lỗi xảy ra");
+      // Xử lý lỗi khác (ưu tiên JSON; fallback text — chỉ đọc body một lần)
+      const errCt = processedResponse.headers.get("content-type") || "";
+      let message = processedResponse.statusText;
+      if (errCt.includes("application/json")) {
+        const errJson = await processedResponse.json().catch(() => null);
+        message = errJson?.message || message;
+      } else {
+        const errText = await processedResponse.text().catch(() => "");
+        message = errText || message;
+      }
+      throw new Error(message || "Có lỗi xảy ra");
+    }
+
+    if (blobResponse) {
+      return await processedResponse.blob();
     }
 
     // Parse response

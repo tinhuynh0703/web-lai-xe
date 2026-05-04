@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
-import { ChevronDown, LayoutGrid, LogOut, User } from "lucide-react";
+import { ChevronDown, LayoutGrid, LogOut, Moon, Sun, User } from "lucide-react";
 import { ROUTES } from "../../constants";
 import { Button } from "../ui";
 import { useAuth } from "../../providers/AuthProvider";
+import { useTheme } from "../../providers";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { cn } from "../../lib/utils";
 import logoImage from "../../assets/logo/logo_sonhung.png";
@@ -12,6 +13,7 @@ export function Header() {
   const location = useLocation();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const closeNav = useCallback(() => setIsNavOpen(false), []);
   const navDropdownRef = useClickOutside(closeNav);
@@ -19,15 +21,25 @@ export function Header() {
   const navLinks = useMemo(
     () => [
       { to: ROUTES.HOME, label: "Trang Chủ" },
-      { to: ROUTES.COURSES, label: "Khóa Đào Tạo", activePrefix: "/khoa-hoc" },
+      // { to: ROUTES.COURSES, label: "Khóa Đào Tạo", activePrefix: "/khoa-hoc" },
       { to: ROUTES.STUDENTS, label: "Học Viên", activePrefix: "/hoc-vien" },
       {
         to: ROUTES.TUITION_PROFILES,
         label: "Hồ Sơ Học Phí",
         activePrefix: "/ke-toan/ho-so-hoc-phi",
       },
+      {
+        to: ROUTES.LICH_SU_NOP_HOC_PHI,
+        label: "Lịch sử nộp HP",
+        activePrefix: "/ke-toan/lich-su-nop-hoc-phi",
+      },
       { to: ROUTES.NHAT_KY_CHUNG_TU, label: "Nhật Ký CT" },
       { to: ROUTES.BANG_CAN_DOI_TAI_KHOAN, label: "Cân đối TK" },
+      {
+        to: ROUTES.THONG_KE_HOC_PHI,
+        label: "Thống kê học phí",
+        activePrefix: "/ke-toan/thong-ke-hoc-phi",
+      },
     ],
     [],
   );
@@ -61,7 +73,7 @@ export function Header() {
             <img
               src={logoImage}
               alt="Trung Tâm Đào Tạo Lái Xe"
-              className="h-12 w-auto object-contain"
+              className="h-10 md:h-12 w-auto object-contain"
             />
           </Link>
 
@@ -74,19 +86,19 @@ export function Header() {
                 aria-controls="main-nav-menu"
                 onClick={() => setIsNavOpen((prev) => !prev)}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                  "inline-flex items-center gap-2 rounded-lg border px-2.5 py-2 sm:px-3 text-sm font-medium transition-colors",
                   "border-gray-300 bg-white hover:bg-gray-50",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500",
                   isNavOpen && "border-blue-300 bg-blue-50/60",
                 )}
               >
                 <LayoutGrid className="h-4 w-4 shrink-0 text-gray-600" />
-                <span className="truncate max-w-[7.5rem] sm:max-w-[11rem] text-left">
+                <span className="hidden sm:inline truncate max-w-[11rem] text-left">
                   {activeNavLink?.label ?? "Trang chủ"}
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 shrink-0 text-gray-500 transition-transform",
+                    "hidden sm:block h-4 w-4 shrink-0 text-gray-500 transition-transform",
                     isNavOpen && "rotate-180",
                   )}
                 />
@@ -132,6 +144,21 @@ export function Header() {
             </div>
 
             <div className="hidden sm:flex items-center gap-2 md:gap-3 shrink-0 pl-2 md:pl-3 border-l border-gray-200">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                className="flex items-center gap-2 shrink-0"
+                title={
+                  isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"
+                }
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </Button>
               {user && (
                 <div className="flex items-center gap-2 text-sm text-gray-700 max-w-[8rem] md:max-w-[12rem]">
                   <User className="w-4 h-4 shrink-0" />
@@ -151,7 +178,20 @@ export function Header() {
               </Button>
             </div>
 
-            <div className="flex sm:hidden shrink-0">
+            <div className="flex sm:hidden shrink-0 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                className="flex items-center gap-1 px-2.5"
+                aria-label={isDark ? "Bật chế độ sáng" : "Bật chế độ tối"}
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"

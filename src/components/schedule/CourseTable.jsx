@@ -83,7 +83,6 @@ export function CourseTable({
       columns={columns}
       enablePagination={true}
       enableSorting={false}
-      enableFiltering={false}
       enableExpanding={true}
       renderSubComponent={renderSubComponent}
       manualPagination={true}

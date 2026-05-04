@@ -1,8 +1,16 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ArrowLeft, BookText, Plus, Save, Search } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  BookText,
+  FileSpreadsheet,
+  Plus,
+  Save,
+  Search,
+} from "lucide-react";
 import { PageHeader } from "../components/layout";
 import { Table, Loading, Button } from "../components/ui";
 import {
@@ -12,13 +20,20 @@ import {
   Textarea,
   TreeSelect,
 } from "../components/forms";
+import { tuitionApi } from "../lib/api";
+import { cn } from "../lib/utils";
 import {
   useAccountingAccountTree,
   useCreateNhatKyChungTu,
   useNhatKyChungTu,
 } from "../hooks";
 import { nhatKyChungTuSchema } from "../lib/validations/schemas";
-import { formatCurrency, formatDate } from "../utils/format";
+import {
+  downloadFileFromBlob,
+  formatDate,
+  formatVndAmountDisplay,
+  formatVndGrouped,
+} from "../utils/format";
 import { showError, showSuccess } from "../utils";
 
 function getTodayString() {
@@ -52,6 +67,7 @@ export default function NhatKyChungTuPage() {
   );
 
   const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
+  const [exportLoading, setExportLoading] = useState(false);
   const createDefaultValues = useMemo(
     () => ({
       soChungTu: "",
@@ -59,7 +75,7 @@ export default function NhatKyChungTuPage() {
       dienGiai: "",
       taiKhoanNo: "",
       taiKhoanCo: "",
-      soTien: "",
+      soTien: undefined,
       ghiChu: "",
     }),
     [],
@@ -115,7 +131,7 @@ export default function NhatKyChungTuPage() {
       {
         accessorKey: "soTien",
         header: "Số tiền",
-        cell: ({ row }) => formatCurrency(row.original.soTien),
+        cell: ({ row }) => formatVndAmountDisplay(row.original.soTien),
       },
       { accessorKey: "ghiChu", header: "Ghi chú", enableSorting: false },
     ],
@@ -127,6 +143,25 @@ export default function NhatKyChungTuPage() {
       fromDate: data.fromDate,
       toDate: data.toDate,
     });
+  };
+
+  const handleExportExcel = async () => {
+    setExportLoading(true);
+    try {
+      const blob = await tuitionApi.exportFileHoaDonNopTienHocPhi({
+        fromDate: appliedFilters.fromDate,
+        toDate: appliedFilters.toDate,
+      });
+      downloadFileFromBlob(
+        blob,
+        `hoa-don-nop-tien-hoc-phi_${appliedFilters.fromDate}_${appliedFilters.toDate}.xlsx`,
+      );
+      showSuccess("Đã xuất file Excel.");
+    } catch (error) {
+      showError(error?.message || "Không thể xuất Excel. Vui lòng thử lại.");
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const handleCreateSubmit = (data) => {
@@ -221,13 +256,58 @@ export default function NhatKyChungTuPage() {
                 allowSelectParentIfNoChildren
                 required
               />
-              <Input
+              <Controller
                 name="soTien"
-                label="Số tiền"
-                type="number"
-                min="0"
-                step="1"
-                required
+                control={createMethods.control}
+                render={({ field, fieldState }) => (
+                  <div className="w-full">
+                    <label
+                      htmlFor="soTien"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
+                      Số tiền
+                      <span className="text-red-500 ml-1 font-bold">*</span>
+                    </label>
+                    <div>
+                      <input
+                        id="soTien"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="0"
+                        className={cn(
+                          "w-full px-4 py-2.5 border rounded-lg transition-all duration-200",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                          "placeholder:text-gray-400 text-gray-900 hover:border-gray-400",
+                          fieldState.error
+                            ? "border-red-400 focus:ring-red-500/20 focus:border-red-500 bg-red-50/50"
+                            : "border-gray-300 bg-white",
+                        )}
+                        value={
+                          field.value === undefined ||
+                          field.value === null ||
+                          field.value === ""
+                            ? ""
+                            : formatVndGrouped(field.value)
+                        }
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          field.onChange(
+                            raw === "" ? undefined : Number(raw),
+                          );
+                        }}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                      />
+                    </div>
+                    {fieldState.error && (
+                      <p className="mt-1.5 text-sm text-red-600 font-medium flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </div>
+                )}
               />
               <div className="lg:col-span-2">
                 <Textarea name="dienGiai" label="Diễn giải" rows={3} required />
@@ -266,14 +346,26 @@ export default function NhatKyChungTuPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
               Danh sách nhật ký chứng từ
             </h2>
-            <div className="text-sm text-gray-600">
-              <span>Tổng bản ghi: {tableData.length}</span>
-              <span className="mx-2">|</span>
-              <span>Tổng tiền: {formatCurrency(totalAmount)}</span>
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="text-sm text-gray-600">
+                <span>Tổng bản ghi: {tableData.length}</span>
+                <span className="mx-2">|</span>
+                <span>Tổng tiền: {formatVndAmountDisplay(totalAmount)}</span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                loading={exportLoading}
+                onClick={handleExportExcel}
+                className="w-full sm:w-auto shrink-0"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Xuất Excel
+              </Button>
             </div>
           </div>
 

@@ -7,8 +7,9 @@ import {
   getExpandedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { useState, Fragment } from "react";
-import { cn } from "../../lib/utils";
+import { useState, Fragment, useCallback } from "react";
+import { cn, rowMatchesGlobalSearch } from "../../lib/utils";
+import { SearchInput } from "./SearchInput";
 
 /**
  * Table component sử dụng TanStack Table
@@ -18,7 +19,9 @@ export function Table({
   columns,
   enablePagination = true,
   enableSorting = true,
-  enableFiltering = false,
+  enableFiltering = true,
+  showSearchBar = true,
+  searchPlaceholder = "Tìm kiếm...",
   enableExpanding = false,
   renderSubComponent,
   className,
@@ -27,6 +30,7 @@ export function Table({
   pageCount,
   onPaginationChange,
   initialState,
+  renderTableFooter,
 }) {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -45,6 +49,17 @@ export function Table({
   const hasTableInitialState =
     tableInitialState && Object.keys(tableInitialState).length > 0;
 
+  const handleGlobalFilterChange = useCallback((updater) => {
+    setGlobalFilter((prev) => {
+      const next =
+        typeof updater === "function" ? updater(prev) : updater;
+      return next ?? "";
+    });
+    if (enablePagination) {
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }
+  }, [enablePagination]);
+
   const table = useReactTable({
     data,
     columns,
@@ -55,9 +70,13 @@ export function Table({
         : undefined,
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
     getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
+    globalFilterFn: enableFiltering
+      ? (row, _columnId, filterValue) =>
+          rowMatchesGlobalSearch(row.original, filterValue)
+      : undefined,
     getExpandedRowModel: enableExpanding ? getExpandedRowModel() : undefined,
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: enableFiltering ? handleGlobalFilterChange : undefined,
     onExpandedChange: enableExpanding ? setExpanded : undefined,
     onPaginationChange: enablePagination
       ? (updater) => {
@@ -72,7 +91,7 @@ export function Table({
     initialState: hasTableInitialState ? tableInitialState : undefined,
     state: {
       sorting,
-      globalFilter,
+      ...(enableFiltering ? { globalFilter } : {}),
       expanded: enableExpanding ? expanded : undefined,
       ...(enablePagination ? { pagination } : {}),
     },
@@ -80,6 +99,15 @@ export function Table({
 
   return (
     <div className={cn("w-full", className)}>
+      {enableFiltering && showSearchBar && (
+        <div className="mb-3">
+          <SearchInput
+            value={globalFilter}
+            onChange={(e) => handleGlobalFilterChange(e.target.value)}
+            placeholder={searchPlaceholder}
+          />
+        </div>
+      )}
       <div className="rounded-md border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-full">
@@ -177,6 +205,7 @@ export function Table({
                   );
                 })
               )}
+              {data.length > 0 && renderTableFooter?.()}
             </tbody>
           </table>
         </div>

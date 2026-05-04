@@ -115,7 +115,6 @@ export default function AddStudentPage() {
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [studentSearch, setStudentSearch] = useState("");
   const [portraitFile, setPortraitFile] = useState(null);
   const portraitInputRef = useRef(null);
 
@@ -332,16 +331,6 @@ export default function AddStudentPage() {
       receiveDate: formatDateFromISO(student.ngay_nhan_hso),
     }));
   }, [studentsData]);
-
-  const filteredCourseStudents = useMemo(() => {
-    if (!studentSearch.trim()) return courseStudents;
-    const term = studentSearch.toLowerCase();
-    return courseStudents.filter((s) =>
-      [s.fullName, s.idCard, s.permanentAddress, s.currentAddress]
-        .filter(Boolean)
-        .some((field) => field.toLowerCase().includes(term)),
-    );
-  }, [courseStudents, studentSearch]);
 
   const convertDateToISO = (dateString) => {
     if (!dateString) return null;
@@ -1225,18 +1214,9 @@ export default function AddStudentPage() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Danh sách học viên của khóa {selectedCourse?.ma_kh || ""}
               </h2>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <input
-                  type="text"
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  placeholder="Tìm kiếm học viên..."
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                />
-                <span className="sm:ml-auto text-sm text-gray-600">
-                  Tổng số bản ghi: {filteredCourseStudents.length}
-                </span>
-              </div>
+              <span className="text-sm text-gray-600 md:text-right">
+                Tổng số bản ghi: {courseStudents.length}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 mb-4">
               <Button
@@ -1277,7 +1257,7 @@ export default function AddStudentPage() {
               </Button>
             </div>
             <Table
-              data={filteredCourseStudents}
+              data={courseStudents}
               columns={studentColumns}
               enablePagination
               enableSorting

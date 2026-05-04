@@ -26,9 +26,11 @@ export { useCreateDefaultSchedule, useCreateManySchedules, useUpdateManySchedule
 export {
   useTuitionProfiles,
   useTuitionPaymentHistory,
+  useSearchLichSuNopHocPhi,
   useCreateTuitionPaymentHistory,
   useDeleteTuitionPaymentHistory,
   useNhatKyChungTu,
   useCreateNhatKyChungTu,
   useTongHopTaiKhoanChaTheoThoiGian,
+  useTongHopTheoThang,
 } from "./useTuition";
