@@ -38,9 +38,9 @@ export default function TuitionProfilesPage() {
     [courses, selectedCourseId],
   );
 
-  const maHangGplx = selectedCourse?.hang_gplx || "";
+  const maHangDT = selectedCourse?.hang_dt || "";
   const { data: tuitionProfiles = [], isLoading: isLoadingProfiles } =
-    useTuitionProfiles(selectedCourseId, maHangGplx);
+    useTuitionProfiles(selectedCourseId, maHangDT);
   const { data: studentsInCourse = [] } = useStudentsByCourse(selectedCourseId);
 
   const formatToDateLocal = (isoString) => {
@@ -167,7 +167,12 @@ export default function TuitionProfilesPage() {
         sectionDescription="Chọn khóa học để tra cứu tình trạng nộp học phí của học viên"
         icon={CreditCard}
         sectionAction={
-          <Button type="button" variant="outline" onClick={() => navigate(-1)} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="w-full sm:w-auto"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Quay lại
           </Button>

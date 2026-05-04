@@ -1,15 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { tuitionApi } from "../lib/api";
 
-export function useTuitionProfiles(maKhoaHoc, maHangGplx) {
+export function useTuitionProfiles(maKhoaHoc, maHangDT) {
   return useQuery({
-    queryKey: ["tuitionProfiles", maKhoaHoc, maHangGplx],
+    queryKey: ["tuitionProfiles", maKhoaHoc, maHangDT],
     queryFn: async () =>
       tuitionApi.getTuitionProfilesByCourse({
         ma_khoa_hoc: maKhoaHoc,
-        ma_hang_gplx: maHangGplx,
+        hang_dt: maHangDT,
       }),
-    enabled: Boolean(maKhoaHoc && maHangGplx),
+    enabled: Boolean(maKhoaHoc && maHangDT),
     placeholderData: [],
   });
 }
@@ -40,7 +40,8 @@ export function useDeleteTuitionPaymentHistory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ idNopTien }) => tuitionApi.deletePaymentHistoryById(idNopTien),
+    mutationFn: ({ idNopTien }) =>
+      tuitionApi.deletePaymentHistoryById(idNopTien),
     onSuccess: (_, variables) => {
       const maDk = variables?.maDk;
       if (maDk) {
