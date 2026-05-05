@@ -20,6 +20,8 @@ export const ROUTES = {
   LOGIN: "/login",
   COURSES: "/khoa-hoc/them",
   STUDENTS: "/hoc-vien/them",
+  UNASSIGNED_STUDENTS: "/hoc-vien/chua-phan-khoa",
+  EDIT_UNASSIGNED_STUDENT: "/hoc-vien/chua-phan-khoa/chinh-sua/:idHs",
   EDIT_STUDENT: "/hoc-vien/chinh-sua/:maDK",
   DASHBOARD: "/dashboard",
   SCHEDULE: "/lich-hoc",

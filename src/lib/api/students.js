@@ -23,6 +23,18 @@ export const studentsApi = {
   getStudentDetail: (maDK) =>
     api.get(`/NguoiLxes/thong-tin-nguoi-lai-xe/${maDK}`),
 
+  // Lấy danh sách học viên chưa phân khóa
+  getUnassignedStudents: () => api.get("/HocVienChuaPhanKhoa"),
+
+  // Lấy danh sách giáo viên
+  getTeachers: () => api.get("/GiaoViens"),
+
+  // Tạo học viên chưa phân khóa
+  createUnassignedStudent: (data) => api.post("/HocVienChuaPhanKhoa", data),
+
+  // Cập nhật học viên chưa phân khóa
+  updateUnassignedStudent: (data) => api.put("/HocVienChuaPhanKhoa", data),
+
   // Upload ảnh thẻ cho học viên
   uploadCardImage: (maDk, file) => {
     const formData = new FormData();

@@ -12,19 +12,6 @@ export function useTrainingClasses() {
       try {
         const data = await danhMucsApi.getTrainingClassCodes();
         return data.map((item) => {
-          // API mới trả về { ma_hang, ma_hang_moi }
-          // Hiển thị label = ma_hang_moi, value = ma_hang
-          if (typeof item === "object") {
-            const hangGplx = item.hang_gplx || item.value || item.label || "";
-            const hangGplxMoi = item.ma_hang_gplx_moi || item.label || maHang;
-            return {
-              value: hangGplx,
-              label: hangGplxMoi, // hiển thị ma_hang_moi trong dropdown
-              hangGplx,
-              hangGplxMoi,
-            };
-          }
-
           // Fallback nếu API trả về string
           return {
             value: item,

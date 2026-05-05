@@ -7,6 +7,8 @@ import HomePage from "./pages/HomePage";
 import AddCoursePage from "./pages/AddCoursePage";
 import AddStudentPage from "./pages/AddStudentPage";
 import EditStudentPage from "./pages/EditStudentPage";
+import UnassignedStudentsPage from "./pages/UnassignedStudentsPage";
+import EditUnassignedStudentPage from "./pages/EditUnassignedStudentPage";
 import ScheduleCenterPage from "./pages/ScheduleCenterPage";
 import TuitionProfilesPage from "./pages/TuitionProfilesPage";
 import TuitionPaymentHistoryPage from "./pages/TuitionPaymentHistoryPage";
@@ -30,6 +32,14 @@ function App() {
                   <Route index element={<HomePage />} />
                   <Route path="khoa-hoc/them" element={<AddCoursePage />} />
                   <Route path="hoc-vien/them" element={<AddStudentPage />} />
+                  <Route
+                    path="hoc-vien/chua-phan-khoa"
+                    element={<UnassignedStudentsPage />}
+                  />
+                  <Route
+                    path="hoc-vien/chua-phan-khoa/chinh-sua/:idHs"
+                    element={<EditUnassignedStudentPage />}
+                  />
                   <Route
                     path="hoc-vien/chinh-sua/:maDK"
                     element={<EditStudentPage />}

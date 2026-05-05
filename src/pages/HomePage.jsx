@@ -26,6 +26,13 @@ export default function HomePage() {
       icon: UserPlus,
     },
     {
+      to: ROUTES.UNASSIGNED_STUDENTS,
+      title: "Học viên chưa phân khóa",
+      description:
+        "Tra cứu danh sách học viên chưa được phân khóa và tình trạng hồ sơ hiện tại",
+      icon: UserPlus,
+    },
+    {
       to: ROUTES.SCHEDULE,
       title: "Tạo lịch học",
       description:
@@ -63,7 +70,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="home-page-shell h-[calc(100vh-65px)] bg-linear-to-br from-blue-50 via-white to-blue-50">
+    <div className="home-page-shell bg-linear-to-br from-blue-50 via-white to-blue-50">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">

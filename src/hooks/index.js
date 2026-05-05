@@ -6,6 +6,10 @@ export * from "./useStudents";
 export {
   useCreateStudentProfile,
   useStudentsByCourse,
+  useUnassignedStudents,
+  useTeachers,
+  useCreateUnassignedStudent,
+  useUpdateUnassignedStudent,
   useStudentDetail,
   useUpdateStudentProfile,
   useUploadStudentImage,

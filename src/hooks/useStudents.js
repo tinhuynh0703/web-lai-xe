@@ -45,6 +45,77 @@ export function useStudentsByCourse(maKH) {
 }
 
 /**
+ * Hook để lấy danh sách học viên chưa phân khóa
+ */
+export function useUnassignedStudents() {
+  return useQuery({
+    queryKey: ["students", "unassigned"],
+    queryFn: async () => {
+      try {
+        const data = await studentsApi.getUnassignedStudents();
+        return data || [];
+      } catch (error) {
+        console.warn(
+          "Không thể lấy danh sách học viên chưa phân khóa:",
+          error.message,
+        );
+        return [];
+      }
+    },
+    staleTime: 30000,
+    placeholderData: [],
+  });
+}
+
+/**
+ * Hook để lấy danh sách giáo viên
+ */
+export function useTeachers() {
+  return useQuery({
+    queryKey: ["teachers"],
+    queryFn: async () => {
+      try {
+        const data = await studentsApi.getTeachers();
+        return data || [];
+      } catch (error) {
+        console.warn("Không thể lấy danh sách giáo viên:", error.message);
+        return [];
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+    placeholderData: [],
+  });
+}
+
+/**
+ * Hook để tạo học viên chưa phân khóa
+ */
+export function useCreateUnassignedStudent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => studentsApi.createUnassignedStudent(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students", "unassigned"] });
+    },
+  });
+}
+
+/**
+ * Hook để cập nhật học viên chưa phân khóa
+ */
+export function useUpdateUnassignedStudent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => studentsApi.updateUnassignedStudent(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students", "unassigned"] });
+    },
+  });
+}
+
+/**
  * Hook để lấy thông tin chi tiết học viên theo mã đăng ký
  */
 export function useStudentDetail(maDK) {

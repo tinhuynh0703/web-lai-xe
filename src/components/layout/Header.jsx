@@ -41,7 +41,13 @@ export function Header() {
       {
         to: ROUTES.STUDENTS,
         label: "Học Viên",
-        activePrefix: "/hoc-vien",
+        activePrefix: "/hoc-vien/them",
+        icon: UserPlus,
+      },
+      {
+        to: ROUTES.UNASSIGNED_STUDENTS,
+        label: "HV Chưa Phân Khóa",
+        activePrefix: "/hoc-vien/chua-phan-khoa",
         icon: UserPlus,
       },
       {
