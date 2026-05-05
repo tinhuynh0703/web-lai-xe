@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Thương hiệu: thay toàn bộ palette `blue-*` — brand #134986 */
+@theme {
+  --color-blue-50: #e9eef5;
+  --color-blue-100: #d0dbe9;
+  --color-blue-200: #a7b9d4;
+  --color-blue-300: #7893bb;
+  --color-blue-400: #4a6c9c;
+  --color-blue-500: #134986;
+  --color-blue-600: #134986;
+  --color-blue-700: #0f3a6f;
+  --color-blue-800: #0c2f5a;
+  --color-blue-900: #0a2648;
+  --color-blue-950: #051528;
+}
+
 :root {
   color-scheme: light;
 }
@@ -18,7 +33,7 @@
 }
 
 :root[data-theme="dark"] .login-page-shell {
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #eff6ff 100%) !important;
+  background: linear-gradient(135deg, #e9eef5 0%, #ffffff 55%, #e9eef5 100%) !important;
   color: #111827 !important;
 }
 

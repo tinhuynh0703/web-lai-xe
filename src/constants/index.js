@@ -8,6 +8,12 @@ export const GENDERS = [
   { value: "F", label: "Nữ" },
 ];
 
+/** Giá trị gửi API `hinh_thuc_thanh_toan` */
+export const PAYMENT_METHODS = [
+  { value: "Tiền mặt", label: "Tiền mặt" },
+  { value: "Chuyển khoản", label: "Chuyển khoản" },
+];
+
 // Routes
 export const ROUTES = {
   HOME: "/",
@@ -21,6 +27,6 @@ export const ROUTES = {
   TUITION_PAYMENT_HISTORY: "/ke-toan/ho-so-hoc-phi/:maDK",
   LICH_SU_NOP_HOC_PHI: "/ke-toan/lich-su-nop-hoc-phi",
   NHAT_KY_CHUNG_TU: "/ke-toan/nhat-ky-chung-tu",
-  BANG_CAN_DOI_TAI_KHOAN: "/ke-toan/bang-can-doi-tai-khoan",
-  THONG_KE_HOC_PHI: "/ke-toan/thong-ke-hoc-phi",
+  CAN_DOI_TAI_KHOAN: "/ke-toan/can-doi-tai-khoan",
+  SETTINGS: "/cai-dat",
 };

@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { ArrowLeft, CreditCard } from "lucide-react";
+import { ArrowLeft, CreditCard, FileSpreadsheet } from "lucide-react";
 import { PageHeader } from "../components/layout";
 import { Form, SingleSelect, Input, DatePicker } from "../components/forms";
 import { Table, Loading, Button } from "../components/ui";
@@ -11,6 +11,7 @@ import {
   useStudentsByCourse,
 } from "../hooks";
 import { formatCurrency, formatDate } from "../utils/format";
+import { showError, showSuccess } from "../utils";
 
 export default function TuitionProfilesPage() {
   const navigate = useNavigate();
@@ -113,6 +114,8 @@ export default function TuitionProfilesPage() {
             (sum, p) => sum + (p.so_tien_nop || 0),
             0,
           ) || 0;
+        const hocPhiVal = item.hoc_phi || 0;
+        const duHocPhi = hocPhiVal > 0 && tongDaNop >= hocPhiVal;
         return {
           maDK: item.ma_dk,
           hoVaTen: item.ho_va_ten || "-",
@@ -120,13 +123,36 @@ export default function TuitionProfilesPage() {
           noiCuTru: item.noi_cu_tru || "-",
           gioiTinh: gioiTinhLabel,
           soCmt: item.so_cmt || "-",
-          hocPhi: item.hoc_phi || 0,
+          hocPhi: hocPhiVal,
           tongDaNop,
-          daHoanThanhHp: Boolean(item.da_hoan_thanh_hp),
+          daHoanThanhHp: Boolean(item.da_hoan_thanh_hp) || duHocPhi,
         };
       }),
     [tuitionProfiles],
   );
+
+  const handleExportXlsx = useCallback(async () => {
+    if (!selectedCourseId) {
+      showError("Vui lòng chọn khóa học trước khi xuất Excel.");
+      return;
+    }
+    if (!tableData.length) {
+      showError("Không có dữ liệu để xuất.");
+      return;
+    }
+    try {
+      const { downloadTuitionProfilesXlsx } =
+        await import("../utils/exportTuitionProfilesXlsx");
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadTuitionProfilesXlsx(
+        tableData,
+        `ho-so-hoc-phi-${selectedCourseId}-${stamp}`,
+      );
+      showSuccess("Đã tải file Excel.");
+    } catch (e) {
+      showError(e?.message || "Không xuất được file Excel.");
+    }
+  }, [selectedCourseId, tableData]);
 
   const columns = useMemo(
     () => [
@@ -245,9 +271,25 @@ export default function TuitionProfilesPage() {
               Danh sách hồ sơ học phí{" "}
               {selectedCourseId ? `- ${selectedCourseId}` : ""}
             </h2>
-            <span className="text-sm text-gray-600">
-              Tổng số bản ghi: {tableData.length}
-            </span>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="shrink-0"
+                disabled={
+                  !selectedCourseId ||
+                  isLoadingProfiles ||
+                  tableData.length === 0
+                }
+                onClick={handleExportXlsx}
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Xuất Excel
+              </Button>
+              <span className="text-sm text-gray-600 whitespace-nowrap">
+                Số dòng: {tableData.length}
+              </span>
+            </div>
           </div>
 
           {!selectedCourseId ? (

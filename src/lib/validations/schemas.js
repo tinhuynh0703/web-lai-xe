@@ -148,6 +148,14 @@ export const tuitionPaymentSchema = yup.object({
   ngayNop: yup.string().trim().required("Ngày nộp là bắt buộc"),
   taiKhoanNo: yup.string().trim().required("Tài khoản nợ là bắt buộc"),
   taiKhoanCo: yup.string().trim().required("Tài khoản có là bắt buộc"),
+  hinhThucThanhToan: yup
+    .string()
+    .trim()
+    .required("Hình thức thanh toán là bắt buộc")
+    .oneOf(
+      ["Tiền mặt", "Chuyển khoản"],
+      "Chọn Tiền mặt hoặc Chuyển khoản",
+    ),
   soBienLai: yup.string().optional().default(""),
   ghiChu: yup.string().optional().default(""),
 });

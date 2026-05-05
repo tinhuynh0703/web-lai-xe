@@ -1,55 +1,50 @@
 import { FileText } from "lucide-react";
 
 /**
- * PageHeader component - Header chung cho các trang form
+ * PageHeader — tiêu đề/trình bày section (không còn thanh full-width + vạch xanh phía trên).
  */
 export function PageHeader({
   title,
   sectionTitle,
   sectionDescription,
+  /** Alias cho sectionDescription (vd. ScheduleCenterPage) */
+  description,
   icon: Icon = FileText,
   sectionAction = null,
 }) {
-  return (
-    <>
-      {/* Main Page Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-6 py-5">
-          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-            {title}
-          </h1>
-        </div>
-      </div>
+  const heading = sectionTitle ?? title;
+  const desc = sectionDescription ?? description;
 
-      {/* Section Header */}
-      {sectionTitle && (
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  const showSection = Boolean(heading || desc || sectionAction);
+
+  if (!showSection) {
+    return null;
+  }
+
+  return (
+    <div className="container mx-auto px-6 py-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
+          {heading && (
             <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <Icon className="w-6 h-6 text-blue-600" />
-              {sectionTitle}
+              <Icon className="w-6 h-6 text-blue-600 shrink-0" />
+              <span>{heading}</span>
             </h2>
-            {sectionAction && (
-              <div className="w-full sm:w-auto flex sm:justify-end">
-                {sectionAction}
-              </div>
-            )}
-          </div>
-          {sectionDescription && (
-            <p className="text-sm text-gray-500 mt-1">{sectionDescription}</p>
+          )}
+          {desc && (
+            <p
+              className={`text-sm text-gray-500 ${heading ? "mt-1" : ""}`}
+            >
+              {desc}
+            </p>
           )}
         </div>
-      )}
-    </>
+        {sectionAction && (
+          <div className="w-full sm:w-auto flex sm:justify-end shrink-0">
+            {sectionAction}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
-
-
-
-
-
-
-
-
-

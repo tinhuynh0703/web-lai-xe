@@ -55,6 +55,11 @@ export function useCreateTuitionPaymentHistory() {
         queryKey: ["tongHopTheoThang"],
         type: "all",
       });
+      await queryClient.invalidateQueries({ queryKey: ["tuitionProfiles"] });
+      await queryClient.refetchQueries({
+        queryKey: ["tuitionProfiles"],
+        type: "all",
+      });
     },
   });
 }
@@ -84,6 +89,11 @@ export function useDeleteTuitionPaymentHistory() {
       await queryClient.invalidateQueries({ queryKey: ["tongHopTheoThang"] });
       await queryClient.refetchQueries({
         queryKey: ["tongHopTheoThang"],
+        type: "all",
+      });
+      await queryClient.invalidateQueries({ queryKey: ["tuitionProfiles"] });
+      await queryClient.refetchQueries({
+        queryKey: ["tuitionProfiles"],
         type: "all",
       });
     },
@@ -126,6 +136,40 @@ export function useCreateNhatKyChungTu() {
   });
 }
 
+export function useLichSuSoDu(nam) {
+  const n = Number(nam);
+  const valid = Number.isInteger(n) && n >= 2000 && n <= 2100;
+
+  return useQuery({
+    queryKey: ["lichSuSoDu", n],
+    queryFn: async () => {
+      const res = await tuitionApi.getLichSuSoDuByNam(n);
+      if (Array.isArray(res)) return res;
+      if (Array.isArray(res?.data)) return res.data;
+      return [];
+    },
+    enabled: valid,
+    placeholderData: [],
+    refetchOnMount: true,
+    staleTime: 0,
+  });
+}
+
+export function useSaveLichSuSoDu() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload) => tuitionApi.saveLichSuSoDu(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["lichSuSoDu"] });
+      await queryClient.refetchQueries({
+        queryKey: ["lichSuSoDu"],
+        type: "all",
+      });
+    },
+  });
+}
+
 export function useTongHopTheoThang(nam, thang) {
   const valid =
     typeof nam === "number" &&
@@ -149,19 +193,3 @@ export function useTongHopTheoThang(nam, thang) {
   });
 }
 
-export function useTongHopTaiKhoanChaTheoThoiGian(fromDate, toDate) {
-  return useQuery({
-    queryKey: ["tongHopTaiKhoanChaTheoThoiGian", fromDate, toDate],
-    queryFn: async () => {
-      const res = await tuitionApi.getTongHopTaiKhoanChaTheoThoiGian({
-        fromDate,
-        toDate,
-      });
-      if (Array.isArray(res)) return res;
-      if (res && Array.isArray(res.data)) return res.data;
-      return [];
-    },
-    enabled: Boolean(fromDate && toDate),
-    placeholderData: [],
-  });
-}

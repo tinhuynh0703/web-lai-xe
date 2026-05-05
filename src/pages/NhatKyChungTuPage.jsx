@@ -292,9 +292,7 @@ export default function NhatKyChungTuPage() {
                         }
                         onChange={(e) => {
                           const raw = e.target.value.replace(/\D/g, "");
-                          field.onChange(
-                            raw === "" ? undefined : Number(raw),
-                          );
+                          field.onChange(raw === "" ? undefined : Number(raw));
                         }}
                         onBlur={field.onBlur}
                         ref={field.ref}
@@ -352,7 +350,7 @@ export default function NhatKyChungTuPage() {
             </h2>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
               <div className="text-sm text-gray-600">
-                <span>Tổng bản ghi: {tableData.length}</span>
+                <span>Số dòng: {tableData.length}</span>
                 <span className="mx-2">|</span>
                 <span>Tổng tiền: {formatVndAmountDisplay(totalAmount)}</span>
               </div>
@@ -377,7 +375,7 @@ export default function NhatKyChungTuPage() {
               columns={columns}
               enablePagination
               enableSorting
-              initialState={{ pagination: { pageSize: 20 } }}
+              initialState={{ pagination: { pageSize: 10 } }}
             />
           )}
         </div>

@@ -9,6 +9,7 @@ import {
   DatePicker,
   Form,
   Input,
+  SingleSelect,
   Textarea,
   TreeSelect,
 } from "../components/forms";
@@ -19,7 +20,7 @@ import {
   useDeleteTuitionPaymentHistory,
   useTuitionPaymentHistory,
 } from "../hooks";
-import { ROUTES } from "../constants";
+import { PAYMENT_METHODS, ROUTES } from "../constants";
 import {
   formatDate,
   formatVndAmountDisplay,
@@ -58,6 +59,7 @@ export default function TuitionPaymentHistoryPage() {
       ngayNop: getTodayString(),
       taiKhoanNo: "",
       taiKhoanCo: "",
+      hinhThucThanhToan: "Tiền mặt",
       soBienLai: "",
       ghiChu: "",
     }),
@@ -72,20 +74,6 @@ export default function TuitionPaymentHistoryPage() {
 
   const { data: paymentHistory = [], isLoading } =
     useTuitionPaymentHistory(maDK);
-
-  const parentNameByChildAccount = useMemo(() => {
-    const map = new Map();
-    (accountTree || []).forEach((parent) => {
-      // Parent without children can be selected directly.
-      if (!parent.children || parent.children.length === 0) {
-        map.set(parent.ma_tai_khoan, parent.ten_tai_khoan || "");
-      }
-      (parent.children || []).forEach((child) => {
-        map.set(child.ma_tai_khoan, parent.ten_tai_khoan || "");
-      });
-    });
-    return map;
-  }, [accountTree]);
 
   const studentInfo = paymentHistory?.[0]?.ma_dk_navigation;
 
@@ -164,7 +152,7 @@ export default function TuitionPaymentHistoryPage() {
       ma_dk: maDK,
       so_tien_nop: Number(data.soTienNop || 0),
       ngay_nop: toISODateStart(data.ngayNop),
-      hinh_thuc_thanh_toan: parentNameByChildAccount.get(data.taiKhoanCo) || "",
+      hinh_thuc_thanh_toan: data.hinhThucThanhToan?.trim() || "",
       tai_khoan_no: data.taiKhoanNo || "",
       tai_khoan_co: data.taiKhoanCo || "",
       so_bien_lai: data.soBienLai?.trim() || "",
@@ -318,9 +306,7 @@ export default function TuitionPaymentHistoryPage() {
                       }
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, "");
-                        field.onChange(
-                          raw === "" ? undefined : Number(raw),
-                        );
+                        field.onChange(raw === "" ? undefined : Number(raw));
                       }}
                       onBlur={field.onBlur}
                       ref={field.ref}
@@ -368,8 +354,15 @@ export default function TuitionPaymentHistoryPage() {
                 allowSelectParentIfNoChildren
                 required
               />
+              <SingleSelect
+                name="hinhThucThanhToan"
+                label="Hình thức thanh toán"
+                options={PAYMENT_METHODS}
+                placeholder="Chọn hình thức thanh toán"
+                required
+              />
               <Input name="soBienLai" label="Số biên lai" />
-              <Textarea name="ghiChu" label="Ghi chú" rows={1} />
+              <Textarea name="ghiChu" label="Ghi chú" rows={3} />
             </div>
             <div className="mt-4 flex justify-end">
               <Button type="submit" loading={createPayment.isPending}>

@@ -1215,7 +1215,7 @@ export default function AddStudentPage() {
                 Danh sách học viên của khóa {selectedCourse?.ma_kh || ""}
               </h2>
               <span className="text-sm text-gray-600 md:text-right">
-                Tổng số bản ghi: {courseStudents.length}
+                Số dòng: {courseStudents.length}
               </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 mb-4">

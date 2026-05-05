@@ -211,7 +211,7 @@ export default function LichSuNopHocPhiPage() {
               columns={columns}
               enablePagination
               enableSorting
-              initialState={{ pagination: { pageSize: 20 } }}
+              initialState={{ pagination: { pageSize: 10 } }}
             />
           )}
         </div>

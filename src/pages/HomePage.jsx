@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "../constants";
 import {
-  BookOpen,
   UserPlus,
   Calendar,
   CreditCard,
   History,
   BookText,
-  Scale,
   BarChart3,
 } from "lucide-react";
 
@@ -56,15 +54,8 @@ export default function HomePage() {
       icon: BookText,
     },
     {
-      to: ROUTES.BANG_CAN_DOI_TAI_KHOAN,
+      to: ROUTES.CAN_DOI_TAI_KHOAN,
       title: "Bảng cân đối tài khoản",
-      description:
-        "Xem tổng phát sinh Nợ/Có và chênh lệch theo tài khoản cha trong kỳ",
-      icon: Scale,
-    },
-    {
-      to: ROUTES.THONG_KE_HOC_PHI,
-      title: "Thống kê học phí",
       description:
         "Tổng hợp số dư đầu kỳ, phát sinh trong kỳ và số dư cuối kỳ theo từng tháng",
       icon: BarChart3,
@@ -72,7 +63,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="home-page-shell bg-linear-to-br from-blue-50 via-white to-blue-50">
+    <div className="home-page-shell h-[calc(100vh-65px)] bg-linear-to-br from-blue-50 via-white to-blue-50">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
@@ -100,7 +91,7 @@ export default function HomePage() {
                         {card.title}
                       </h2>
                       <p className="text-gray-600 mb-4">{card.description}</p>
-                      <div className="flex items-center text-blue-600 font-medium">
+                      <div className="flex items-center font-medium text-[#339900]">
                         <span>Bắt đầu ngay</span>
                         <svg
                           className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"

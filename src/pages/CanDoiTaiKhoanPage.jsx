@@ -93,7 +93,7 @@ function sumBlock(rows, block, field) {
   return rows.reduce((s, r) => s + Number(r[block]?.[field] ?? 0), 0);
 }
 
-export default function ThongKeHocPhiPage() {
+export default function CanDoiTaiKhoanPage() {
   const navigate = useNavigate();
   const defaultFilters = useMemo(() => {
     const d = new Date();
@@ -109,24 +109,25 @@ export default function ThongKeHocPhiPage() {
   }));
   const [search, setSearch] = useState("");
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const filterMethods = useForm({
     defaultValues: { kyThang: defaultFilters.kyThang },
   });
 
   const namNum = Number(applied.nam);
   const thangNum = Number(applied.thang);
-  const namArg =
-    Number.isFinite(namNum) && namNum >= 2000 ? namNum : null;
+  const namArg = Number.isFinite(namNum) && namNum >= 2000 ? namNum : null;
   const thangArg =
     Number.isFinite(thangNum) && thangNum >= 1 && thangNum <= 12
       ? thangNum
       : null;
 
-  const { data: rawData, isLoading, isFetching, error } = useTongHopTheoThang(
-    namArg,
-    thangArg,
-  );
+  const {
+    data: rawData,
+    isLoading,
+    isFetching,
+    error,
+  } = useTongHopTheoThang(namArg, thangArg);
 
   const mergedRows = useMemo(() => mergeTongHopRows(rawData), [rawData]);
 
@@ -183,7 +184,7 @@ export default function ThongKeHocPhiPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50">
       <PageHeader
-        title="Thống kê học phí"
+        title="Bảng cân đối tài khoản"
         sectionTitle="Bảng cân đối tài khoản theo tháng"
         sectionDescription="Tổng hợp số dư đầu kỳ, phát sinh và số dư cuối kỳ theo năm / tháng"
         icon={BarChart3}
@@ -230,7 +231,7 @@ export default function ThongKeHocPhiPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
-              Thống kê học phí — Tháng {thangArg ?? "?"}/{namArg ?? "?"}
+              Bảng cân đối tài khoản — Tháng {thangArg ?? "?"}/{namArg ?? "?"}
             </h2>
             <span className="text-sm text-gray-600">
               Số dòng: {filteredRows.length}
@@ -254,132 +255,132 @@ export default function ThongKeHocPhiPage() {
           ) : (
             <div className="rounded-md border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
-              <table className="w-full min-w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr className="border-b border-gray-200">
-                    <th
-                      rowSpan={2}
-                      className="px-6 py-3 align-middle text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-14"
-                    >
-                      STT
-                    </th>
-                    <th
-                      rowSpan={2}
-                      className="px-6 py-3 align-middle text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
-                    >
-                      Số hiệu
-                    </th>
-                    <th
-                      rowSpan={2}
-                      className="px-6 py-3 align-middle text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]"
-                    >
-                      Tên tài khoản
-                    </th>
-                    <th
-                      colSpan={2}
-                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Số dư đầu kỳ
-                    </th>
-                    <th
-                      colSpan={2}
-                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Số phát sinh trong kỳ
-                    </th>
-                    <th
-                      colSpan={2}
-                      className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Số dư cuối kỳ
-                    </th>
-                  </tr>
-                  <tr className="border-b border-gray-200">
-                    <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                      Nợ
-                    </th>
-                    <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                      Có
-                    </th>
-                    <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                      Nợ
-                    </th>
-                    <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                      Có
-                    </th>
-                    <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                      Nợ
-                    </th>
-                    <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                      Có
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedRows.map((row, idx) => (
-                    <tr
-                      key={row.ma_tai_khoan}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                        {pageIndex * pageSize + idx + 1}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                        {row.ma_tai_khoan}
-                      </td>
-                      <td className="px-6 py-4 text-gray-900">
-                        {row.ten_tai_khoan || "—"}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900">
-                        {cellMoney(row.dau?.tong_no)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900">
-                        {cellMoney(row.dau?.tong_co)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900">
-                        {cellMoney(row.ps?.tong_no)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900">
-                        {cellMoney(row.ps?.tong_co)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900">
-                        {cellMoney(row.cuoi?.tong_no)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900">
-                        {cellMoney(row.cuoi?.tong_co)}
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredRows.length > 0 && (
-                    <tr className="bg-gray-100 font-semibold border-t-2 border-gray-200">
-                      <td
-                        colSpan={3}
-                        className="px-6 py-4 text-center text-sm text-gray-900"
+                <table className="w-full min-w-full text-sm border-collapse">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr className="border-b border-gray-200">
+                      <th
+                        rowSpan={2}
+                        className="px-6 py-3 align-middle text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-14 border-b border-gray-200"
                       >
-                        TỔNG CỘNG
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900">
-                        {formatVndAmountDisplay(totals.dauNo)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900">
-                        {formatVndAmountDisplay(totals.dauCo)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900">
-                        {formatVndAmountDisplay(totals.psNo)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900">
-                        {formatVndAmountDisplay(totals.psCo)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900">
-                        {formatVndAmountDisplay(totals.cuoiNo)}
-                      </td>
-                      <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900">
-                        {formatVndAmountDisplay(totals.cuoiCo)}
-                      </td>
+                        STT
+                      </th>
+                      <th
+                        rowSpan={2}
+                        className="px-6 py-3 align-middle text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-b border-gray-200"
+                      >
+                        Số hiệu
+                      </th>
+                      <th
+                        rowSpan={2}
+                        className="px-6 py-3 align-middle text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px] border-b border-gray-200"
+                      >
+                        Tên tài khoản
+                      </th>
+                      <th
+                        colSpan={2}
+                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-300 border-b border-gray-200"
+                      >
+                        Số dư đầu kỳ
+                      </th>
+                      <th
+                        colSpan={2}
+                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-300 border-b border-gray-200"
+                      >
+                        Số phát sinh trong kỳ
+                      </th>
+                      <th
+                        colSpan={2}
+                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-300 border-b border-gray-200"
+                      >
+                        Số dư cuối kỳ
+                      </th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                    <tr className="border-b border-gray-200">
+                      <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+                        Nợ
+                      </th>
+                      <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+                        Có
+                      </th>
+                      <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+                        Nợ
+                      </th>
+                      <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+                        Có
+                      </th>
+                      <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+                        Nợ
+                      </th>
+                      <th className="px-6 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+                        Có
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedRows.map((row, idx) => (
+                      <tr
+                        key={row.ma_tai_khoan}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                          {pageIndex * pageSize + idx + 1}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                          {row.ma_tai_khoan}
+                        </td>
+                        <td className="px-6 py-4 text-gray-900">
+                          {row.ten_tai_khoan || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900 border-l border-gray-300">
+                          {cellMoney(row.dau?.tong_no)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900 border-l border-gray-300">
+                          {cellMoney(row.dau?.tong_co)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900 border-l border-gray-300">
+                          {cellMoney(row.ps?.tong_no)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900 border-l border-gray-300">
+                          {cellMoney(row.ps?.tong_co)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900 border-l border-gray-300">
+                          {cellMoney(row.cuoi?.tong_no)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-gray-900 border-l border-gray-300">
+                          {cellMoney(row.cuoi?.tong_co)}
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredRows.length > 0 && (
+                      <tr className="bg-gray-100 font-semibold border-t-2 border-gray-200">
+                        <td
+                          colSpan={3}
+                          className="px-6 py-4 text-center text-sm text-gray-900"
+                        >
+                          TỔNG CỘNG
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900 border-l border-gray-300">
+                          {formatVndAmountDisplay(totals.dauNo)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900 border-l border-gray-300">
+                          {formatVndAmountDisplay(totals.dauCo)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900 border-l border-gray-300">
+                          {formatVndAmountDisplay(totals.psNo)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900 border-l border-gray-300">
+                          {formatVndAmountDisplay(totals.psCo)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900 border-l border-gray-300">
+                          {formatVndAmountDisplay(totals.cuoiNo)}
+                        </td>
+                        <td className="px-6 py-4 text-right tabular-nums whitespace-nowrap text-sm text-gray-900 border-l border-gray-300">
+                          {formatVndAmountDisplay(totals.cuoiCo)}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
               {filteredRows.length > 0 && (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-t border-gray-200 bg-white">
@@ -423,11 +424,14 @@ export default function ThongKeHocPhiPage() {
                     </button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="thong-ke-hoc-phi-page-size" className="text-sm text-gray-700">
+                    <label
+                      htmlFor="can-doi-tai-khoan-page-size"
+                      className="text-sm text-gray-700"
+                    >
                       Hiển thị:
                     </label>
                     <select
-                      id="thong-ke-hoc-phi-page-size"
+                      id="can-doi-tai-khoan-page-size"
                       value={pageSize}
                       onChange={(e) => {
                         setPageSize(Number(e.target.value));
@@ -451,7 +455,6 @@ export default function ThongKeHocPhiPage() {
               )}
             </div>
           )}
-
         </div>
       </div>
     </div>

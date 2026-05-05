@@ -110,39 +110,47 @@ export function Table({
       )}
       <div className="rounded-md border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full">
+          <table className="w-full min-w-full border-collapse">
             <thead className="bg-gray-50 border-b border-gray-200">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
+                      colSpan={header.colSpan}
+                      rowSpan={header.rowSpan}
                       className={cn(
                         "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap",
                         enableSorting &&
+                          !header.isPlaceholder &&
                           header.column.getCanSort() &&
                           "cursor-pointer select-none hover:bg-gray-100"
                       )}
                       onClick={
-                        enableSorting
+                        enableSorting &&
+                        !header.isPlaceholder &&
+                        header.column.getCanSort()
                           ? header.column.getToggleSortingHandler()
                           : undefined
                       }
                     >
-                      <div className="flex items-center gap-2">
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {enableSorting && header.column.getCanSort() && (
-                          <span className="text-gray-400">
-                            {{
-                              asc: "↑",
-                              desc: "↓",
-                            }[header.column.getIsSorted()] ?? "⇅"}
-                          </span>
-                        )}
-                      </div>
+                      {header.isPlaceholder ? null : (
+                        <div className="flex items-center gap-2">
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                          {enableSorting &&
+                            header.column.getCanSort() && (
+                              <span className="text-gray-400">
+                                {{
+                                  asc: "↑",
+                                  desc: "↓",
+                                }[header.column.getIsSorted()] ?? "⇅"}
+                              </span>
+                            )}
+                        </div>
+                      )}
                     </th>
                   ))}
                 </tr>

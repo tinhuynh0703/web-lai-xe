@@ -24,11 +24,6 @@ export const tuitionApi = {
       },
     }),
 
-  getTongHopTaiKhoanChaTheoThoiGian: ({ fromDate, toDate }) =>
-    api.get("/NhatKyChungTu/tong-hop-theo-tai-khoan-cha-theo-thoi-gian", {
-      params: { fromDate, toDate },
-    }),
-
   /** Tổng hợp theo tháng (bảng cân đối / thống kê học phí) */
   getTongHopTheoThang: ({ nam, thang }) =>
     api.get("/NhatKyChungTu/tong-hop-theo-thang", {
@@ -36,6 +31,13 @@ export const tuitionApi = {
     }),
 
   createNhatKyChungTu: (payload) => api.post("/NhatKyChungTu", payload),
+
+  /** Lịch sử số dư theo năm (GET) */
+  getLichSuSoDuByNam: (nam) =>
+    api.get(`/LichSuSoDu/${encodeURIComponent(nam)}`),
+
+  /** POST — tạo mới hoặc cập nhật (cùng endpoint) */
+  saveLichSuSoDu: (payload) => api.post("/LichSuSoDu", payload),
 
   /** POST với query fromDate, toDate — trả về file (Excel) */
   exportFileHoaDonNopTienHocPhi: ({ fromDate, toDate }) => {

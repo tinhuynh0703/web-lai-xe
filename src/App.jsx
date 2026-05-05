@@ -11,9 +11,9 @@ import ScheduleCenterPage from "./pages/ScheduleCenterPage";
 import TuitionProfilesPage from "./pages/TuitionProfilesPage";
 import TuitionPaymentHistoryPage from "./pages/TuitionPaymentHistoryPage";
 import NhatKyChungTuPage from "./pages/NhatKyChungTuPage";
-import BangCanDoiTaiKhoanPage from "./pages/BangCanDoiTaiKhoanPage";
-import ThongKeHocPhiPage from "./pages/ThongKeHocPhiPage";
+import CanDoiTaiKhoanPage from "./pages/CanDoiTaiKhoanPage";
 import LichSuNopHocPhiPage from "./pages/LichSuNopHocPhiPage";
+import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
 
 function App() {
@@ -30,24 +30,36 @@ function App() {
                   <Route index element={<HomePage />} />
                   <Route path="khoa-hoc/them" element={<AddCoursePage />} />
                   <Route path="hoc-vien/them" element={<AddStudentPage />} />
-                  <Route path="hoc-vien/chinh-sua/:maDK" element={<EditStudentPage />} />
-                  <Route path="lich-hoc" element={<ScheduleCenterPage />} />
-                  <Route path="ke-toan/ho-so-hoc-phi" element={<TuitionProfilesPage />} />
-                  <Route path="ke-toan/ho-so-hoc-phi/:maDK" element={<TuitionPaymentHistoryPage />} />
-                  <Route path="ke-toan/nhat-ky-chung-tu" element={<NhatKyChungTuPage />} />
                   <Route
-                    path="ke-toan/bang-can-doi-tai-khoan"
-                    element={<BangCanDoiTaiKhoanPage />}
+                    path="hoc-vien/chinh-sua/:maDK"
+                    element={<EditStudentPage />}
+                  />
+                  <Route path="lich-hoc" element={<ScheduleCenterPage />} />
+                  <Route
+                    path="ke-toan/ho-so-hoc-phi"
+                    element={<TuitionProfilesPage />}
                   />
                   <Route
-                    path="ke-toan/thong-ke-hoc-phi"
-                    element={<ThongKeHocPhiPage />}
+                    path="ke-toan/ho-so-hoc-phi/:maDK"
+                    element={<TuitionPaymentHistoryPage />}
+                  />
+                  <Route
+                    path="ke-toan/nhat-ky-chung-tu"
+                    element={<NhatKyChungTuPage />}
+                  />
+                  <Route
+                    path="ke-toan/can-doi-tai-khoan"
+                    element={<CanDoiTaiKhoanPage />}
                   />
                   <Route
                     path="ke-toan/lich-su-nop-hoc-phi"
                     element={<LichSuNopHocPhiPage />}
                   />
-                  <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+                  <Route path="cai-dat" element={<SettingsPage />} />
+                  <Route
+                    path="*"
+                    element={<Navigate to={ROUTES.HOME} replace />}
+                  />
                 </Routes>
               </Layout>
             </ProtectedRoute>
