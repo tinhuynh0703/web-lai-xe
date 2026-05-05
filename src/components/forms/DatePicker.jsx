@@ -31,6 +31,35 @@ function formatDateToYmd(date) {
   return `${year}-${month}-${day}`;
 }
 
+function formatTypedDate(raw) {
+  const digits = String(raw ?? "")
+    .replace(/\D/g, "")
+    .slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+function parseTypedDate(raw) {
+  const digits = String(raw ?? "")
+    .replace(/\D/g, "")
+    .slice(0, 8);
+  if (digits.length !== 8) return null;
+  const day = Number(digits.slice(0, 2));
+  const month = Number(digits.slice(2, 4));
+  const year = Number(digits.slice(4, 8));
+  const parsed = new Date(year, month - 1, day);
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== day
+  ) {
+    return null;
+  }
+  return parsed;
+}
+
 /**
  * DatePicker component với validation từ React Hook Form
  */
@@ -79,6 +108,22 @@ export const DatePicker = forwardRef(function DatePicker(
                     selected={parseDateValue(value)}
                     onChange={(selectedDate) => {
                       restField.onChange(formatDateToYmd(selectedDate));
+                    }}
+                    onChangeRaw={(event) => {
+                      const input = event.target;
+                      if (!input) return;
+                      const formatted = formatTypedDate(input.value);
+                      input.value = formatted;
+
+                      if (formatted.length === 0) {
+                        restField.onChange("");
+                        return;
+                      }
+
+                      const parsed = parseTypedDate(formatted);
+                      if (parsed) {
+                        restField.onChange(formatDateToYmd(parsed));
+                      }
                     }}
                     onBlur={restField.onBlur}
                     dateFormat="dd/MM/yyyy"
